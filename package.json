@@ -1,5 +1,5 @@
 {
-  "name": "unified-engine",
+  "name": "@unifiedts/engine",
   "version": "9.0.5",
   "description": "Engine to process multiple files with unified",
   "license": "MIT",
@@ -8,17 +8,8 @@
     "processor",
     "engine"
   ],
-  "repository": "unifiedjs/unified-engine",
-  "bugs": "https://github.com/unifiedjs/unified-engine/issues",
-  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
-  "funding": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/unified"
-  },
-  "contributors": [
-    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
-    "Christian Murphy <christian.murphy.42@gmail.com>"
-  ],
+  "repository": "unifiedts/unified-engine",
+  "bugs": "https://github.com/unifiedts/unified-engine/issues",
   "sideEffects": false,
   "type": "module",
   "main": "index.js",
