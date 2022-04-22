@@ -1,21 +1,35 @@
-import type { Plugin, PluginTuple, PluggableList } from 'unified';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import jsYaml from 'js-yaml';
-import parseJson from 'parse-json';
+import {pathToFileURL} from 'node:url';
 import createDebug from 'debug';
-import { resolvePlugin } from 'load-plugin';
+import {fault} from 'fault';
 import isPlainObj from 'is-plain-obj';
-import { fault } from 'fault';
-import { FindUp } from './find-up.js';
+import jsYaml from 'js-yaml';
+import {resolvePlugin} from 'load-plugin';
+import parseJson from 'parse-json';
+import type {PluggableList, Plugin, PluginTuple} from 'unified';
+import {FindUp} from './find-up.js';
+/**
+ * @typedef Options
+ * @property {string} cwd
+ * @property {string} [packageField]
+ * @property {string} [pluginPrefix]
+ * @property {string} [rcName]
+ * @property {string} [rcPath]
+ * @property {boolean} [detectConfig]
+ * @property {ConfigTransform} [configTransform]
+ * @property {Preset} [defaultConfig]
+ * @property {Preset['settings']} [settings]
+ * @property {Preset['plugins']} [plugins]
+ */
+import {Options as MainOptions} from './index';
 
 export type Settings = Record<string, unknown>;
 export type PluginIdObject = Record<string, Settings | null | undefined>;
-export type PluginIdList = Array<string | [string, ...Array<unknown>]>;
+export type PluginIdList = Array<string | [string, ...unknown[]]>;
 
 export interface Config {
 	settings?: Settings;
-	plugins?: PluginTuple<unknown[]>[];
+	plugins?: Array<PluginTuple<unknown[]>>;
 }
 export interface Preset {
 	settings?: Settings;
@@ -23,14 +37,19 @@ export interface Preset {
 }
 
 export function isPreset(value: unknown): value is Preset {
-  if (isPlainObj(value)) {
-      if (!(value.settings && isPlainObj(value.settings))) {
-          return false;
-      }
-      if (!value.plugins) {return false;}
-      return true
-  }
-  return false
+	if (isPlainObj(value)) {
+		if (!(value.settings && isPlainObj(value.settings))) {
+			return false;
+		}
+
+		if (!value.plugins) {
+			return false;
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 export type ConfigTransform = (config: unknown, filePath: string) => Preset;
@@ -54,23 +73,6 @@ const loaders: Record<string, Loader> = {
 };
 
 const defaultLoader = loadJson;
-
-/**
- * @typedef Options
- * @property {string} cwd
- * @property {string} [packageField]
- * @property {string} [pluginPrefix]
- * @property {string} [rcName]
- * @property {string} [rcPath]
- * @property {boolean} [detectConfig]
- * @property {ConfigTransform} [configTransform]
- * @property {Preset} [defaultConfig]
- * @property {Preset['settings']} [settings]
- * @property {Preset['plugins']} [plugins]
- */
-
-import { Options as MainOptions } from './index';
-import { isObject } from 'node:util';
 
 export interface Options
 	extends Pick<
@@ -121,7 +123,7 @@ export class Configuration {
 			);
 		}
 
-		this.given = { settings: options.settings, plugins: options.plugins };
+		this.given = {settings: options.settings, plugins: options.plugins};
 
 		this.findUp = new FindUp<Config>({
 			cwd: options.cwd,
@@ -137,7 +139,8 @@ export class Configuration {
 			filePath || path.resolve(this.cwd, 'stdin.js'),
 			(error, file) => {
 				if (error || file) {
-					return callback(error, file);
+					callback(error, file);
+					return;
 				}
 
 				this.create(undefined, undefined).then((result) => {
@@ -151,8 +154,8 @@ export class Configuration {
 		buf?: Buffer | undefined,
 		filePath?: string | undefined,
 	): Promise<Config | undefined> {
-		const options = { prefix: this.pluginPrefix, cwd: this.cwd };
-		const result: Required<Config> = { settings: {}, plugins: [] };
+		const options = {prefix: this.pluginPrefix, cwd: this.cwd};
+		const result: Required<Config> = {settings: {}, plugins: []};
 		const extname = filePath ? path.extname(filePath) : undefined;
 		const loader =
 			extname && extname in loaders ? loaders[extname] : defaultLoader;
@@ -184,21 +187,21 @@ export class Configuration {
 				await merge(
 					result,
 					this.defaultConfig,
-					Object.assign({}, options, { root: this.cwd }),
+					Object.assign({}, options, {root: this.cwd}),
 				);
 			}
 		} else {
 			await merge(
 				result,
 				value,
-				Object.assign({}, options, { root: path.dirname(filePath) }),
+				Object.assign({}, options, {root: path.dirname(filePath)}),
 			);
 		}
 
 		await merge(
 			result,
 			this.given,
-			Object.assign({}, options, { root: this.cwd }),
+			Object.assign({}, options, {root: this.cwd}),
 		);
 
 		// C8 bug on Node@12
@@ -224,17 +227,17 @@ async function loadYaml(
 ): Promise<Preset | undefined> {
 	// C8 bug on Node@12
 	/* c8 ignore next 4 */
-   const yaml =
-		jsYaml.load(String(buf), { filename: path.basename(filePath) })
-    if (yaml && isPreset(yaml)) {
-      return yaml;
-    }
-
+	const yaml = jsYaml.load(String(buf), {
+		filename: path.basename(filePath),
+	});
+	if (yaml && isPreset(yaml)) {
+		return yaml;
+	}
 }
 
 /** @type {Loader} */
 async function loadJson(
-	this: { packageField: string },
+	this: {packageField: string},
 	buf: Buffer,
 	filePath: string,
 ): Promise<Preset | undefined> {
@@ -242,19 +245,20 @@ async function loadJson(
 
 	// C8 bug on Node@12
 	/* c8 ignore next 8 */
-	const json: unknown =  path.basename(filePath) === 'package.json'
-		? result[this.packageField]
-		: result ;
+	const json: unknown =
+		path.basename(filePath) === 'package.json'
+			? result[this.packageField]
+			: result;
 
-    if (json && isPreset(json)) {
-      return json;
-    }
+	if (json && isPreset(json)) {
+		return json;
+	}
 }
 
 async function merge(
 	target: Required<Config>,
 	raw: Preset,
-	options: { root: string; prefix: string | undefined },
+	options: {root: string; prefix: string | undefined},
 ): Promise<Config> {
 	if (typeof raw === 'object' && raw !== null) {
 		await addPreset(raw);
@@ -304,9 +308,8 @@ async function merge(
 			/* eslint-disable no-await-in-loop */
 			// type-coverage:ignore-next-line
 			await (Array.isArray(value)
-				?
-        // @ts-expect-error: Spreading is fine.
-        use(...value)
+				? // @ts-expect-error: Spreading is fine.
+				  use(...value)
 				: use(value, undefined));
 			/* eslint-enable no-await-in-loop */
 		}
@@ -383,7 +386,7 @@ async function merge(
 				await merge(
 					target,
 					result,
-					Object.assign({}, options, { root: path.dirname(fp) }),
+					Object.assign({}, options, {root: path.dirname(fp)}),
 				);
 			}
 		} catch {
@@ -425,7 +428,10 @@ async function merge(
  * @param {Settings|undefined} value
  * @returns {void}
  */
-function reconfigure(entry: PluginTuple<unknown[]>, value: Settings | undefined): void {
+function reconfigure(
+	entry: PluginTuple<unknown[]>,
+	value: Settings | undefined,
+): void {
 	if (isPlainObj(entry[1]) && isPlainObj(value)) {
 		value = Object.assign({}, entry[1], value);
 	}
@@ -433,7 +439,10 @@ function reconfigure(entry: PluginTuple<unknown[]>, value: Settings | undefined)
 	entry[1] = value;
 }
 
-function find(entries: PluginTuple<unknown[]>[], plugin: Plugin): PluginTuple<unknown[]> | undefined {
+function find(
+	entries: Array<PluginTuple<unknown[]>>,
+	plugin: Plugin,
+): PluginTuple<unknown[]> | undefined {
 	let index = -1;
 
 	while (++index < entries.length) {
@@ -449,7 +458,7 @@ async function loadFromAbsolutePath(
 	base: string,
 ): Promise<Plugin | Preset> {
 	try {
-		const result: { default?: Plugin | Preset } = await import(
+		const result: {default?: Plugin | Preset} = await import(
 			pathToFileURL(fp).href
 		);
 

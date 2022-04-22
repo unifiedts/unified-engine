@@ -5,3 +5,5 @@ coverage/
 *.d.mts
 *.log
 yarn.lock
+dist/
+.vscode/

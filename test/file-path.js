@@ -1,79 +1,80 @@
-import path from 'node:path'
-import {PassThrough} from 'node:stream'
-import test from 'tape'
-import {engine} from '../index.js'
-import {noop} from './util/noop-processor.js'
-import {spy} from './util/spy.js'
+import path from 'node:path';
+import {PassThrough} from 'node:stream';
+import test from 'tape';
+import {engine} from '../index.js';
+import {noop} from './util/noop-processor.js';
+import {spy} from './util/spy.js';
 
-const fixtures = path.join('test', 'fixtures')
+const fixtures = path.join('test', 'fixtures');
 
 test('file-path', (t) => {
-  t.plan(2)
+	t.plan(2);
 
-  t.test('should throw on `filePath` with files', (t) => {
-    t.plan(1)
+	t.test('should throw on `filePath` with files', (t) => {
+		t.plan(1);
 
-    engine(
-      {
-        processor: noop,
-        cwd: path.join(fixtures, 'simple-structure'),
-        files: ['.'],
-        filePath: 'qux/quux.foo',
-        extensions: ['txt']
-      },
-      (error) => {
-        const actual = error && error.message.split('\n').slice(0, 2).join('\n')
+		engine(
+			{
+				processor: noop,
+				cwd: path.join(fixtures, 'simple-structure'),
+				files: ['.'],
+				filePath: 'qux/quux.foo',
+				extensions: ['txt'],
+			},
+			(error) => {
+				const actual =
+					error && error.message.split('\n').slice(0, 2).join('\n');
 
-        const expected = [
-          'Do not pass both `--file-path` and real files.',
-          'Did you mean to pass stdin instead of files?'
-        ].join('\n')
+				const expected = [
+					'Do not pass both `--file-path` and real files.',
+					'Did you mean to pass stdin instead of files?',
+				].join('\n');
 
-        t.equal(actual, expected, 'should fail')
-      }
-    )
-  })
+				t.equal(actual, expected, 'should fail');
+			},
+		);
+	});
 
-  t.test('should support `filePath`', (t) => {
-    const stdout = spy()
-    const stderr = spy()
-    const stream = new PassThrough()
-    let index = 0
+	t.test('should support `filePath`', (t) => {
+		const stdout = spy();
+		const stderr = spy();
+		const stream = new PassThrough();
+		let index = 0;
 
-    t.plan(1)
+		t.plan(1);
 
-    function send() {
-      if (++index > 10) {
-        stream.end()
-      } else {
-        stream.write(index + '\n')
-        setTimeout(send, 10)
-      }
-    }
+		function send() {
+			if (++index > 10) {
+				stream.end();
+			} else {
+				stream.write(index + '\n');
+				setTimeout(send, 10);
+			}
+		}
 
-    send()
+		send();
 
-    engine(
-      {
-        processor: noop,
-        cwd: path.join(fixtures, 'empty'),
-        streamOut: stdout.stream,
-        streamError: stderr.stream,
-        streamIn: stream,
-        filePath: 'foo' + path.sep + 'bar.baz'
-      },
-      (error, code) => {
-        t.deepEqual(
-          [error, code, stdout(), stderr()],
-          [
-            null,
-            0,
-            '1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n',
-            'foo' + path.sep + 'bar.baz: no issues found\n'
-          ],
-          'should report'
-        )
-      }
-    )
-  })
-})
+		engine(
+			{
+				processor: noop,
+				cwd: path.join(fixtures, 'empty'),
+				streamOut: stdout.stream,
+				streamError: stderr.stream,
+				streamIn: stream,
+				filePath: 'foo' + path.sep + 'bar.baz',
+			},
+			(error, code) => {
+				t.deepEqual(
+					[error, code, stdout(), stderr()],
+					[
+						null,
+						0,
+						'1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n',
+						'foo' + path.sep + 'bar.baz: no issues found\n',
+					],
+					'should report',
+				);
+			},
+		);
+	});
+});

@@ -1,4 +1,4 @@
 /** @type {import('../../../../index.js').Preset} */
-const config = {settings: {}}
+const config = { settings: {} };
 
-export default config
+export default config;

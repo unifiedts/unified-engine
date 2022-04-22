@@ -1,12 +1,12 @@
 {
-  "foo": {
-    "options": {
-      "foxtrot": true
-    },
-    "plugs": {
-      "./test.js": {
-        "golf": false
-      }
-    }
-  }
+	"foo": {
+		"options": {
+			"foxtrot": true
+		},
+		"plugs": {
+			"./test.js": {
+				"golf": false
+			}
+		}
+	}
 }

@@ -1,3 +1,3 @@
-const preset = false
+const preset = false;
 
-export default preset
+export default preset;

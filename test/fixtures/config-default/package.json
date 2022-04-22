@@ -1,13 +1,13 @@
 {
-  "type": "commonjs",
-  "foo": {
-    "settings": {
-      "charlie": true
-    },
-    "plugins": {
-      "./test-found.js": {
-        "delta": false
-      }
-    }
-  }
+	"type": "commonjs",
+	"foo": {
+		"settings": {
+			"charlie": true
+		},
+		"plugins": {
+			"./test-found.js": {
+				"delta": false
+			}
+		}
+	}
 }

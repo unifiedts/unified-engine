@@ -1,19 +1,19 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.json"],
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020"],
-    "module": "ES2020",
-    "moduleResolution": "node",
-    "allowJs": false,
-    "checkJs": false,
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "outDir": "dist",
+	"include": ["src/**/*.ts", "src/**/*.json"],
+	"compilerOptions": {
+		"target": "ES2020",
+		"lib": ["ES2020"],
+		"module": "ES2020",
+		"moduleResolution": "node",
+		"allowJs": false,
+		"checkJs": false,
+		"declaration": true,
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"outDir": "dist",
 		"rootDir": "src",
-    "inlineSourceMap": true,
+		"inlineSourceMap": true,
 		"declarationDir": "dist/types"
-  }
+	}
 }

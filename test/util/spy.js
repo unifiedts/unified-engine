@@ -1,32 +1,32 @@
-import {PassThrough} from 'node:stream'
+import {PassThrough} from 'node:stream';
 
 export function spy() {
-  const stream = new PassThrough()
-  /** @type {Array<string>} */
-  const output = []
-  const originalWrite = stream.write
+	const stream = new PassThrough();
+	/** @type {Array<string>} */
+	const output = [];
+	const originalWrite = stream.write;
 
-  /**
-   * @param {string} chunk
-   */
-  // @ts-expect-error: hush.
-  stream.write = (chunk, encoding, callback) => {
-    callback = typeof encoding === 'function' ? encoding : callback
+	/**
+	 * @param {string} chunk
+	 */
+	// @ts-expect-error: hush.
+	stream.write = (chunk, encoding, callback) => {
+		callback = typeof encoding === 'function' ? encoding : callback;
 
-    if (typeof callback === 'function') {
-      setImmediate(callback, undefined)
-    }
+		if (typeof callback === 'function') {
+			setImmediate(callback, undefined);
+		}
 
-    output.push(chunk)
-  }
+		output.push(chunk);
+	};
 
-  done.stream = stream
+	done.stream = stream;
 
-  return done
+	return done;
 
-  function done() {
-    stream.write = originalWrite
+	function done() {
+		stream.write = originalWrite;
 
-    return output.join('')
-  }
+		return output.join('');
+	}
 }

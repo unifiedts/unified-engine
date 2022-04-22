@@ -1,122 +1,141 @@
 {
-  "name": "@unifiedts/engine",
-  "version": "9.0.5",
-  "description": "Engine to process multiple files with unified",
-  "license": "MIT",
-  "keywords": [
-    "unified",
-    "processor",
-    "engine"
-  ],
-  "repository": "unifiedts/unified-engine",
-  "bugs": "https://github.com/unifiedts/unified-engine/issues",
-  "sideEffects": false,
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/typesindex.d.ts",
-  "files": [
-    "lib/",
-    "index.d.ts",
-    "index.js"
-  ],
-  "dependencies": {
-    "@types/concat-stream": "^1.0.0",
-    "@types/debug": "^4.0.0",
-    "@types/is-empty": "^1.0.0",
-    "@types/js-yaml": "^4.0.0",
-    "@types/node": "^17.0.0",
-    "@types/unist": "^2.0.0",
-    "concat-stream": "^2.0.0",
-    "debug": "^4.0.0",
-    "fault": "^2.0.0",
-    "glob": "^7.0.0",
-    "ignore": "^5.0.0",
-    "is-buffer": "^2.0.0",
-    "is-empty": "^1.0.0",
-    "is-plain-obj": "^4.0.0",
-    "js-yaml": "^4.0.0",
-    "load-plugin": "^4.0.0",
-    "parse-json": "^6.0.0",
-    "to-vfile": "^7.0.0",
-    "trough": "^2.0.0",
-    "unist-util-inspect": "^7.0.0",
-    "vfile-message": "^3.0.0",
-    "vfile-reporter": "^7.0.0",
-    "vfile-statistics": "^2.0.0"
-  },
-  "devDependencies": {
-    "@types/glob": "^7.0.0",
-    "@types/tape": "^4.0.0",
-    "c8": "^7.0.0",
-    "prettier": "^2.0.0",
-    "remark": "^14.0.0",
-    "remark-cli": "^10.0.0",
-    "remark-preset-wooorm": "^9.0.0",
-    "remark-toc": "^8.0.0",
-    "rimraf": "^3.0.0",
-    "strip-ansi": "^7.0.0",
-    "tape": "^5.0.0",
-    "type-coverage": "^2.0.0",
-    "typescript": "^4.0.0",
-    "unified": "^10.0.0",
-    "vfile": "^5.0.0",
-    "vfile-reporter-json": "^3.0.0",
-    "vfile-reporter-pretty": "^6.0.0",
-    "xo": "^0.47.0"
-  },
-  "scripts": {
-    "build": "rimraf \"dist\" && tsc && type-coverage",
-    "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
-    "test-api": "node --conditions development test/index.js",
-    "test-coverage": "c8 --check-coverage --branches 100 --functions 100 --lines 100 --statements 100 --reporter lcov node --conditions development test/index.js",
-    "test": "npm run build && npm run format && npm run test-coverage"
-  },
-  "remarkConfig": {
-    "plugins": [
-      "preset-wooorm",
-      [
-        "toc",
-        {
-          "heading": "contents",
-          "maxDepth": 3,
-          "tight": true
-        }
-      ]
-    ]
-  },
-  "prettier": {
-    "semi": true,
-    "trailingComma": "all",
-    "singleQuote": true,
-    "printWidth": 80,
-    "tabWidth": 4,
-    "useTabs": true,
-    "arrowParens": "always",
-    "bracketSameLine": true
-  },
-  "xo": {
-    "prettier": true,
-    "rules": {
-      "capitalized-comments": "off",
-      "complexity": "off",
-      "unicorn/no-this-assignment": "off"
-    },
-    "overrides": [
-      {
-        "files": "test/fixtures/**/*.js",
-        "rules": {
-          "unicorn/no-empty-file": "off",
-          "unicorn/prefer-module": "off"
-        }
-      }
-    ]
-  },
-  "typeCoverage": {
-    "atLeast": 99.93,
-    "detail": true,
-    "strict": true,
-    "ignoreCatch": true,
-    "updateIfHigher": true,
-    "#": "needed `any`s"
-  }
+	"name": "@unifiedts/engine",
+	"version": "9.0.5",
+	"description": "Engine to process multiple files with unified",
+	"license": "MIT",
+	"keywords": [
+		"unified",
+		"processor",
+		"engine"
+	],
+	"repository": "unifiedts/unified-engine",
+	"bugs": "https://github.com/unifiedts/unified-engine/issues",
+	"sideEffects": false,
+	"main": "dist/index.js",
+	"types": "dist/typesindex.d.ts",
+	"files": [
+		"dist/"
+	],
+	"dependencies": {
+		"@types/concat-stream": "^1.0.0",
+		"@types/debug": "^4.0.0",
+		"@types/is-empty": "^1.0.0",
+		"@types/js-yaml": "^4.0.0",
+		"@types/node": "^17.0.0",
+		"@types/unist": "^2.0.0",
+		"concat-stream": "^2.0.0",
+		"debug": "^4.0.0",
+		"fault": "^2.0.0",
+		"glob": "^7.0.0",
+		"ignore": "^5.0.0",
+		"is-buffer": "^2.0.0",
+		"is-empty": "^1.0.0",
+		"is-plain-obj": "^4.0.0",
+		"js-yaml": "^4.0.0",
+		"load-plugin": "^4.0.0",
+		"parse-json": "^6.0.0",
+		"to-vfile": "^7.0.0",
+		"trough": "^2.0.0",
+		"unist-util-inspect": "^7.0.0",
+		"vfile-message": "^3.0.0",
+		"vfile-reporter": "^7.0.0",
+		"vfile-statistics": "^2.0.0"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.0.0",
+		"@types/tape": "^4.0.0",
+		"c8": "^7.0.0",
+		"husky": "^7.0.4",
+		"lint-staged": "^11.1.2",
+		"organize-imports-cli": "^0.9.0",
+		"prettier": "^2.0.0",
+		"remark": "^14.0.0",
+		"remark-cli": "^10.0.0",
+		"remark-preset-wooorm": "^9.0.0",
+		"remark-toc": "^8.0.0",
+		"rimraf": "^3.0.0",
+		"strip-ansi": "^7.0.0",
+		"tape": "^5.0.0",
+		"type-coverage": "^2.0.0",
+		"typescript": "^4.0.0",
+		"unified": "^10.0.0",
+		"vfile": "^5.0.0",
+		"vfile-reporter-json": "^3.0.0",
+		"vfile-reporter-pretty": "^6.0.0",
+		"xo": "^0.47.0"
+	},
+	"scripts": {
+		"postinstall": "husky install",
+		"build": "rimraf \"dist\" && tsc && type-coverage",
+		"format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
+		"test-api": "node --conditions development test/index.js",
+		"test-coverage": "c8 --check-coverage --branches 100 --functions 100 --lines 100 --statements 100 --reporter lcov node --conditions development test/index.js",
+		"test": "npm run build && npm run format && npm run test-coverage"
+	},
+	"lint-staged": {
+		"*.{ts,tsx}": [
+			"organize-imports-cli",
+			"npx prettier --write --no-editorconfig",
+			"npx xo --fix",
+			"npx prettier --write --no-editorconfig"
+		],
+		"*.d.ts": [
+			"npx xo --fix"
+		],
+		"*.{js,json}": [
+			"npx prettier --write --no-editorconfig"
+		],
+		"*.md": [
+			"npx remark . -qfo"
+		]
+	},
+	"remarkConfig": {
+		"plugins": [
+			"preset-wooorm",
+			[
+				"toc",
+				{
+					"heading": "contents",
+					"maxDepth": 3,
+					"tight": true
+				}
+			]
+		]
+	},
+	"prettier": {
+		"semi": true,
+		"trailingComma": "all",
+		"singleQuote": true,
+		"printWidth": 80,
+		"tabWidth": 4,
+		"useTabs": true,
+		"arrowParens": "always",
+		"bracketSameLine": true
+	},
+	"xo": {
+		"prettier": true,
+		"rules": {
+			"capitalized-comments": "off",
+			"complexity": "off",
+			"unicorn/no-this-assignment": "off",
+			"import/extensions": "off"
+		},
+		"overrides": [
+			{
+				"files": "test/fixtures/**/*.js",
+				"rules": {
+					"unicorn/no-empty-file": "off",
+					"unicorn/prefer-module": "off"
+				}
+			}
+		]
+	},
+	"typeCoverage": {
+		"atLeast": 99.93,
+		"detail": true,
+		"strict": true,
+		"ignoreCatch": true,
+		"updateIfHigher": true,
+		"#": "needed `any`s"
+	}
 }

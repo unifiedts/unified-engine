@@ -1,1 +1,1 @@
-exports.settings = {foo: 'bar'}
+exports.settings = { foo: 'bar' };
