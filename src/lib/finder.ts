@@ -1,47 +1,41 @@
-/**
- * @typedef {import('fs').Stats} Stats
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('./ignore.js').Ignore} Ignore
- * @typedef {import('ignore').Ignore} GitIgnore
- *
- * @typedef Options
- * @property {string} cwd
- * @property {Array<string>} extensions
- * @property {boolean|undefined} silentlyIgnore
- * @property {Array<string>} ignorePatterns
- * @property {Ignore} ignore
- *
- * @typedef SearchResults
- * @property {fs.Stats|undefined} stats
- * @property {boolean|undefined} ignored
- *
- * @typedef Result
- * @property {Array<string|VFile>} input
- * @property {Array<VFile>} output
- *
- * @typedef CleanResult
- * @property {boolean} oneFileMode
- * @property {Array<VFile>} files
- *
- * @callback Callback
- * @param {Error|null} error
- * @param {CleanResult} [result]
- */
-
+import {Ignore} from './ignore'
+import {Ignore as GitIgnore} from 'ignore'
+import {Stats} from 'fs'
+import {VFile} from 'vfile'
 import path from 'node:path'
 import fs from 'node:fs'
 import ignore from 'ignore'
 import glob from 'glob'
 import {toVFile} from 'to-vfile'
 
+export interface Options {
+  cwd: string
+  extensions: Array<string>
+  silentlyIgnore: boolean | undefined
+  ignorePatterns: Array<string>
+  ignore: Ignore
+}
+export interface SearchResults {
+  stats: fs.Stats | undefined
+  ignored: boolean | undefined
+}
+export interface Result {
+  input: Array<string | VFile>
+  output: Array<VFile>
+}
+export interface CleanResult {
+  oneFileMode: boolean
+  files: Array<VFile>
+}
+export type Callback = (error: Error | null, result?: CleanResult) => void
+
+
+
 /**
  * Search `patterns`, a mix of globs, paths, and files.
  *
- * @param {Array<string|VFile>} input
- * @param {Options} options
- * @param {Callback} callback
  */
-export function finder(input, options, callback) {
+export function finder(input:Array<string|VFile>, options:Options, callback:Callback):void {
   expand(input, options, (error, result) => {
     // Glob errors are unusual.
     // other errors are on the vfile results.
@@ -57,19 +51,13 @@ export function finder(input, options, callback) {
 /**
  * Expand the given glob patterns, search given and found directories, and map
  * to vfiles.
- *
- * @param {Array<string|VFile>} input
- * @param {Options} options
- * @param {(error: Error|null, result?: Result) => void} next
  */
-function expand(input, options, next) {
-  /** @type {Array<string|VFile>} */
-  let paths = []
+function expand(input: Array<string|VFile>, options: Options, next: (error: Error|null, result?: Result) => void) {
+  let paths: Array<string|VFile> = []
   let actual = 0
   let expected = 0
   let index = -1
-  /** @type {boolean|undefined} */
-  let failed
+  let failed: boolean|undefined = undefined;
 
   while (++index < input.length) {
     let file = input[index]
@@ -116,11 +104,7 @@ function expand(input, options, next) {
     search(paths, options, done1)
   }
 
-  /**
-   * @param {Error|null} error
-   * @param {Array<VFile>} [files]
-   */
-  function done1(error, files) {
+  function done1(error:Error|null, files?:Array<VFile>) {
     // `search` currently does not give errors.
     /* c8 ignore next 2 */
     if (error || !files) {
@@ -133,18 +117,13 @@ function expand(input, options, next) {
 
 /**
  * Search `paths`.
- *
- * @param {Array<string|VFile>} input
- * @param {Options & {nested?: boolean}} options
- * @param {(error: Error|null, files: Array<VFile>) => void} next
  */
-function search(input, options, next) {
+function search(input:Array<string|VFile>, options: Options & {nested?: boolean}, next: (error: Error|null, files: Array<VFile>) => void) {
   const extraIgnore = ignore().add(options.ignorePatterns)
   let expected = 0
   let actual = 0
   let index = -1
-  /** @type {Array<VFile>} */
-  let files = []
+  let files:Array<VFile> = []
 
   while (++index < input.length) {
     each(input[index])
@@ -154,10 +133,7 @@ function search(input, options, next) {
     next(null, files)
   }
 
-  /**
-   * @param {string|VFile} file
-   */
-  function each(file) {
+  function each(file: string|VFile): void {
     const ext = typeof file === 'string' ? path.extname(file) : file.extname
 
     // Normalise globs.
@@ -252,10 +228,8 @@ function search(input, options, next) {
     /**
      * Error is never given. Always given `results`.
      *
-     * @param {Error|null} _
-     * @param {Array<VFile>} results
      */
-    function one(_, results) {
+    function one(_: Error|null, results: Array<VFile>) {
       /* istanbul ignore else - Always given. */
       if (results) {
         files = files.concat(results)
@@ -270,20 +244,13 @@ function search(input, options, next) {
   }
 }
 
-/**
- * @param {VFile|string} file
- * @param {Options & {extraIgnore: GitIgnore}} options
- * @param {(error: NodeJS.ErrnoException|null, result?: SearchResults) => void} callback
- */
-function statAndIgnore(file, options, callback) {
+function statAndIgnore(file: VFile|string, options: Options & {extraIgnore: GitIgnore}, callback: (error: NodeJS.ErrnoException|null, result?: SearchResults) => void) {
   const fp = path.resolve(options.cwd, filePath(file))
   const normal = path.relative(options.cwd, fp)
   let expected = 1
   let actual = 0
-  /** @type {Stats|undefined} */
-  let stats
-  /** @type {boolean|undefined} */
-  let ignored
+  let stats: Stats|undefined = undefined;
+  let ignored:boolean|undefined = undefined;
 
   if (typeof file === 'string' || !file.value) {
     expected++
@@ -300,10 +267,7 @@ function statAndIgnore(file, options, callback) {
     setImmediate(onStatOrCheck, error)
   })
 
-  /**
-   * @param {Error|null} error
-   */
-  function onStatOrCheck(error) {
+  function onStatOrCheck(error:Error|null) {
     actual++
 
     if (error) {
@@ -325,27 +289,15 @@ function statAndIgnore(file, options, callback) {
   }
 }
 
-/**
- * @param {string|VFile} file
- * @returns {string|undefined}
- */
-function base(file) {
+function base(file: string|VFile): string|undefined {
   return typeof file === 'string' ? path.basename(file) : file.basename
 }
 
-/**
- * @param {string|VFile} file
- * @returns {string}
- */
-function filePath(file) {
+function filePath(file:string|VFile): string {
   return typeof file === 'string' ? file : file.path
 }
 
-/**
- * @param {Result} result
- * @returns {boolean}
- */
-function oneFileMode(result) {
+function oneFileMode(result:Result):boolean {
   return (
     result.output.length === 1 &&
     result.input.length === 1 &&

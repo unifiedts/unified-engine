@@ -1,8 +1,6 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Context} Context
- */
+import type {VFile} from 'vfile'
+import type {Callback} from 'trough'
+import type {Context} from './index'
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -14,12 +12,8 @@ const debug = createDebug('unified-engine:file-pipeline:file-system')
 /**
  * Write a virtual file to the file-system.
  * Ignored when `output` is not given.
- *
- * @param {Context} context
- * @param {VFile} file
- * @param {Callback} next
  */
-export function fileSystem(context, file, next) {
+export function fileSystem(context:Context, file: VFile, next: Callback):void {
   if (!context.settings.output) {
     debug('Ignoring writing to file-system')
     return next()

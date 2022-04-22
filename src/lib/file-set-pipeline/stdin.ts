@@ -1,13 +1,10 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Settings} Settings
- */
+import type {VFile, VFileReporter} from 'vfile'
+import type {Callback} from 'trough'
+import type {Settings, Configuration} from './index'
 
-/**
- * @typedef Context
- * @property {Array<string|VFile>} files
- */
+export interface Context {
+  files: Array<string | VFile>
+}
 
 import createDebug from 'debug'
 import concatStream from 'concat-stream'
@@ -15,12 +12,7 @@ import {toVFile} from 'to-vfile'
 
 const debug = createDebug('unified-engine:file-set-pipeline:stdin')
 
-/**
- * @param {Context} context
- * @param {Settings} settings
- * @param {Callback} next
- */
-export function stdin(context, settings, next) {
+export function stdin(context: Context, settings: Settings, next: Callback) {
   if (settings.files && settings.files.length > 0) {
     debug('Ignoring `streamIn`')
 

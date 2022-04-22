@@ -1,25 +1,19 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Settings} Settings
- * @typedef {import('./index.js').Configuration} Configuration
- */
-
-/**
- * @typedef Context
- * @property {Array<string|VFile>} files
- * @property {Configuration} [configuration]
- */
-
+import type {VFile} from 'vfile'
+import type {Callback} from 'trough'
+import type {Settings, Configuration} from './index'
 import {Ignore} from '../ignore.js'
 import {finder} from '../finder.js'
 
-/**
- * @param {Context} context
- * @param {Settings} settings
- * @param {Callback} next
- */
-export function fileSystem(context, settings, next) {
+export interface Context {
+  files: Array<string | VFile>
+  configuration?: Configuration
+}
+
+export function fileSystem(
+  context: Context,
+  settings: Settings,
+  next: Callback
+): void {
   if (context.files.length === 0) {
     next()
   } else {
@@ -73,12 +67,7 @@ export function fileSystem(context, settings, next) {
     )
   }
 
-  /**
-   * @param {VFile} left
-   * @param {VFile} right
-   * @returns {number}
-   */
-  function sortAlphabetically(left, right) {
+  function sortAlphabetically(left: VFile, right:VFile): 1| -1 {
     return left.path < right.path ? -1 : 1
   }
 }

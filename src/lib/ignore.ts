@@ -1,35 +1,28 @@
-/**
- * @typedef {import('ignore').Ignore & {filePath: string}} IgnoreConfig
- *
- * @typedef {'cwd'|'dir'} ResolveFrom
- *
- * @typedef Options
- * @property {string} cwd
- * @property {boolean|undefined} detectIgnore
- * @property {string|undefined} ignoreName
- * @property {string|undefined} ignorePath
- * @property {ResolveFrom|undefined} ignorePathResolveFrom
- *
- * @callback Callback
- * @param {Error|null} error
- * @param {boolean|undefined} [result]
- */
-
+import ignore, {Ignore as GitIgnore} from 'ignore'
 import path from 'node:path'
-import ignore from 'ignore'
 import {FindUp} from './find-up.js'
+export type IgnoreConfig = GitIgnore & {filePath: string}
+export type ResolveFrom = 'cwd' | 'dir'
+export interface Options {
+  cwd: string
+  detectIgnore: boolean | undefined
+  ignoreName: string | undefined
+  ignorePath: string | undefined
+  ignorePathResolveFrom: ResolveFrom | undefined
+}
+export type Callback = (
+  error: Error | null,
+  result?: boolean | undefined
+) => void
 
 export class Ignore {
-  /**
-   * @param {Options} options
-   */
-  constructor(options) {
-    /** @type {string} */
+  cwd: string
+  ignorePathResolveFrom?: ResolveFrom | undefined
+  findUp: FindUp<IgnoreConfig>
+  constructor(options: Options) {
     this.cwd = options.cwd
-    /** @type {ResolveFrom|undefined} */
     this.ignorePathResolveFrom = options.ignorePathResolveFrom
 
-    /** @type {FindUp<IgnoreConfig>} */
     this.findUp = new FindUp({
       cwd: options.cwd,
       filePath: options.ignorePath,
@@ -39,11 +32,7 @@ export class Ignore {
     })
   }
 
-  /**
-   * @param {string} filePath
-   * @param {Callback} callback
-   */
-  check(filePath, callback) {
+  check(filePath: string, callback: Callback): void {
     this.findUp.load(filePath, (error, ignoreSet) => {
       if (error) {
         callback(error)
@@ -73,13 +62,7 @@ export class Ignore {
   }
 }
 
-/**
- * @param {Buffer} buf
- * @param {string} filePath
- * @returns {IgnoreConfig}
- */
-function create(buf, filePath) {
-  /** @type {IgnoreConfig} */
+function create(buf: Buffer, filePath: string): IgnoreConfig {
   return Object.assign(ignore().add(String(buf)), {
     filePath: path.dirname(filePath)
   })

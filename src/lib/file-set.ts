@@ -3,28 +3,27 @@
  * @typedef {import('trough').Pipeline} Pipeline
  */
 
-/**
- * @callback CompleterCallback
- * @param {FileSet} set
- * @param {(error?: Error|null) => void} callback
- * @returns {void}
- *
- * @callback CompleterAsync
- * @param {FileSet} set
- * @returns {Promise<void>}
- *
- * @callback CompleterSync
- * @param {FileSet} set
- * @returns {void}
- *
- * @typedef {(CompleterCallback|CompleterAsync|CompleterSync) & {pluginId?: string}} Completer
- */
-
-import {EventEmitter} from 'node:events'
+ import {VFile} from 'vfile'
+ import {Middleware, Pipeline} from 'trough'
+ import {EventEmitter} from 'node:events'
 import {trough} from 'trough'
 import {toVFile} from 'to-vfile'
+import { Plugin } from 'unified'
+
+
+ export type CompleterCallback = (set :FileSet , callback: (error?: Error|null) => void) => void
+ export type CompleterAsync = (set :FileSet ) => Promise<void>
+ export type CompleterSync = (set :FileSet ) => void
+ export type Completer = (CompleterCallback|CompleterAsync|CompleterSync) & {pluginId?: string}
 
 export class FileSet extends EventEmitter {
+
+  files:VFile[];
+  origins: string[];
+  plugins: Completer[];
+  expected: number;
+  actual: number;
+  pipeline: Pipeline;
   /**
    * FileSet constructor.
    * A FileSet is created to process multiple files through unified processors.
@@ -34,17 +33,11 @@ export class FileSet extends EventEmitter {
   constructor() {
     super()
 
-    /** @type {Array<VFile>} */
     this.files = []
-    /** @type {Array<string>} */
     this.origins = []
-    /** @type {Array<Completer>} */
     this.plugins = []
-    /** @type {number} */
     this.expected = 0
-    /** @type {number} */
     this.actual = 0
-    /** @type {Pipeline} */
     this.pipeline = trough()
 
     // Called when a single file has completed it’s pipeline, triggering `done`
@@ -67,10 +60,8 @@ export class FileSet extends EventEmitter {
 
   /**
    * Attach middleware to the pipeline on `fileSet`.
-   *
-   * @param {Completer} plugin
    */
-  use(plugin) {
+  use(plugin: Completer) {
     const pipeline = this.pipeline
     let duplicate = false
 
@@ -98,9 +89,8 @@ export class FileSet extends EventEmitter {
    * *   Never written to the file system or streamOut
    * *   Not reported for
    *
-   * @param {string|VFile} file
    */
-  add(file) {
+  add(file:string|VFile): this {
     if (typeof file === 'string') {
       file = toVFile(file)
     }

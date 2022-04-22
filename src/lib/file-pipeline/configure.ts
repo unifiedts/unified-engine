@@ -1,14 +1,11 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Context} Context
- */
-
-import createDebug from 'debug'
+import {Pipeline, trough,Callback} from 'trough'
+import createDebug, { Debugger } from 'debug'
 import {statistics} from 'vfile-statistics'
 import isEmpty from 'is-empty'
+import { VFile } from 'vfile'
+import type { Context } from './index';
 
-const debug = createDebug('unified-engine:file-pipeline:configure')
+const debug: Debugger = createDebug('unified-engine:file-pipeline:configure')
 
 /**
  * Collect configuration for a file based on the context.
@@ -17,7 +14,7 @@ const debug = createDebug('unified-engine:file-pipeline:configure')
  * @param {VFile} file
  * @param {Callback} next
  */
-export function configure(context, file, next) {
+export function configure(context:Context, file: VFile, next:Callback) {
   if (statistics(file).fatal) {
     return next()
   }
@@ -68,7 +65,7 @@ export function configure(context, file, next) {
         /* Should not happen anymore! */
         /* c8 ignore next 4 */
       } catch (error_) {
-        const exception = /** @type {Error} */ (error_)
+        const exception: Error =  (error_) as Error
         return next(exception)
       }
     }

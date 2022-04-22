@@ -1,7 +1,6 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('./index.js').Context} Context
- */
+import type {VFile} from 'vfile'
+import type {Callback} from 'trough'
+import type {Context} from './index'
 
 import createDebug from 'debug'
 import {statistics} from 'vfile-statistics'
@@ -12,11 +11,8 @@ const debug = createDebug('unified-engine:file-pipeline:stringify')
 
 /**
  * Stringify a tree.
- *
- * @param {Context} context
- * @param {VFile} file
  */
-export function stringify(context, file) {
+export function stringify(context:Context, file: VFile) {
   /** @type {unknown} */
   let value
 
@@ -55,14 +51,12 @@ export function stringify(context, file) {
     // Add the line feed to create a valid UNIX file.
     value = JSON.stringify(context.tree, null, 2) + '\n'
   } else {
-    // @ts-expect-error: `tree` is defined if we came this far.
     value = context.processor.stringify(context.tree, file)
   }
 
   if (value === undefined || value === null) {
     // Empty.
   } else if (typeof value === 'string' || isBuffer(value)) {
-    // @ts-expect-error: `isBuffer` checks buffer.
     file.value = value
   } else {
     file.result = value

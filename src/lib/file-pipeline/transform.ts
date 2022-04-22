@@ -1,8 +1,6 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Context} Context
- */
+import type {VFile} from 'vfile'
+import type {Callback} from 'trough'
+import type {Context} from './index'
 
 import createDebug from 'debug'
 import {statistics} from 'vfile-statistics'
@@ -16,7 +14,7 @@ const debug = createDebug('unified-engine:file-pipeline:transform')
  * @param {VFile} file
  * @param {Callback} next
  */
-export function transform(context, file, next) {
+export function transform(context: Context, file: VFile, next: Callback): void {
   if (statistics(file).fatal) {
     next()
   } else {

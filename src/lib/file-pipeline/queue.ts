@@ -1,9 +1,7 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Context} Context
- */
 
+ import type {VFile} from 'vfile'
+ import type {Callback} from 'trough'
+ import type {Context} from './index'
 import createDebug from 'debug'
 import {statistics} from 'vfile-statistics'
 
@@ -15,11 +13,8 @@ const own = {}.hasOwnProperty
  * Queue all files which came this far.
  * When the last file gets here, run the file-set pipeline and flush the queue.
  *
- * @param {Context} context
- * @param {VFile} file
- * @param {Callback} next
  */
-export function queue(context, file, next) {
+export function queue(context:Context, file:VFile, next:Callback) {
   let origin = file.history[0]
   // @ts-expect-error: store a completion map on the `fileSet`.
   let map = context.fileSet.complete
@@ -50,10 +45,7 @@ export function queue(context, file, next) {
   context.fileSet.complete = {}
   context.fileSet.pipeline.run(context.fileSet, done)
 
-  /**
-   * @param {VFile} file
-   */
-  function each(file) {
+  function each(file:VFile) {
     const key = file.history[0]
 
     if (statistics(file).fatal) {
@@ -68,10 +60,7 @@ export function queue(context, file, next) {
     }
   }
 
-  /**
-   * @param {Error|Null} error
-   */
-  function done(error) {
+  function done(error:Error|null) {
     debug('Flushing: all files can be flushed')
 
     // Flush.

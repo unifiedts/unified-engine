@@ -1,69 +1,58 @@
-import fs from 'node:fs'
+import fs, { PathLike } from 'node:fs'
 import path from 'node:path'
 import {fault} from 'fault'
 import createDebug from 'debug'
 import {wrap} from 'trough'
+import { isFunction } from 'node:util'
 
 const debug = createDebug('unified-engine:find-up')
+export interface BaseValue {
+  code: string;
+  path : PathLike
+  syscall: string;
+}
+export type Create<Value> = (buf:Buffer , filePath: string) => Promise<Value|undefined>|Value|undefined
 
-/**
- * @template Value
- */
-export class FindUp {
-  /**
-   * @callback Create
-   * @param {Buffer} buf
-   * @param {string} filePath
-   * @returns {Promise<Value|undefined>|Value|undefined}
-   */
+export interface Options<Value> {
+  cwd:string;
+  filePath:string|undefined;
+  detect?:boolean|undefined;
+  names:string[];
+  create:Create<Value>;
+}
 
-  /**
-   * @callback Callback
-   * @param {Error|null} error
-   * @param {Value} [result]
-   * @returns {void}
-   */
+export type Callback<Value>  = (error:Error|null ,result?: Value) => void
+function isCallback<Value>(value:unknown[]): value is Callback<Value>[]
+function isCallback<Value>(value:unknown): value is Callback<Value>
+function isCallback<Value>(value:unknown | unknown[]): value is Callback<Value> |Callback<Value>[] {
+  return (typeof value === 'function' && value.arguments.length === 2)
+}
 
-  /**
-   * @typedef Options
-   * @property {string} cwd
-   * @property {string|undefined} filePath
-   * @property {boolean|undefined} [detect]
-   * @property {Array<string>} names
-   * @property {Create} create
-   */
+export class FindUp<Value> {
 
-  /**
-   * @param {Options} options
-   */
-  constructor(options) {
-    /** @type {Record<string, Array<Callback>|undefined|Error|Value>} */
+   cache:Record<string, (Callback<Value>)[]|undefined|Error|Value>;
+   cwd: string;
+   detect: boolean;
+   names: string[];
+   create: Create<Value>;
+   givenFilePath?: string|undefined;
+   givenFile: Error|Value|Callback<Value>[]|undefined;
+
+  constructor(options: Options<Value>) {
     this.cache = {}
-    /** @type {string} */
     this.cwd = options.cwd
-    /** @type {boolean|undefined} */
-    this.detect = options.detect
-    /** @type {Array<string>} */
+    this.detect = options.detect ?? false
     this.names = options.names
-    /** @type {Create} */
     this.create = options.create
 
-    /** @type {string|undefined} */
     this.givenFilePath = options.filePath
       ? path.resolve(options.cwd, options.filePath)
       : undefined
 
-    /* eslint-disable no-unused-expressions */
-    /** @type {Error|Value|Array<Callback>|undefined} */
     this.givenFile
-    /* eslint-enable no-unused-expressions */
   }
 
-  /**
-   * @param {string} filePath
-   * @param {Callback} callback
-   */
-  load(filePath, callback) {
+  load(filePath:string, callback:Callback<Value>) {
     const self = this
     const givenFile = this.givenFile
     const {givenFilePath} = this
@@ -77,8 +66,7 @@ export class FindUp {
         debug('Checking given file `%s`', givenFilePath)
         fs.readFile(givenFilePath, (error, buf) => {
           if (error) {
-            /** @type {NodeJS.ErrnoException} */
-            const result = fault(
+            const result: NodeJS.ErrnoException = fault(
               'Cannot read given file `%s`\n%s',
               path.relative(this.cwd, givenFilePath),
               error.stack
@@ -105,8 +93,7 @@ export class FindUp {
             })(buf, givenFilePath)
           }
 
-          /** @param {Error|Value} result */
-          function loaded(result) {
+          function loaded(result: Error|Value) {
             self.givenFile = result
             applyAll(cbs, result)
           }
@@ -130,10 +117,7 @@ export class FindUp {
       find(parent)
     }
 
-    /**
-     * @param {string} directory
-     */
-    function find(directory) {
+    function find(directory:string) {
       let index = -1
 
       next()
@@ -159,12 +143,7 @@ export class FindUp {
         }
       }
 
-      /**
-       * @param {NodeJS.ErrnoException|null} error
-       * @param {Buffer} [buf]
-       * @returns {void}
-       */
-      function done(error, buf) {
+      function done(error: NodeJS.ErrnoException|null, buf?:Buffer): void {
         const fp = path.join(directory, self.names[index])
 
         if (error) {
@@ -202,25 +181,22 @@ export class FindUp {
         })(buf, fp)
       }
 
-      /**
-       * @param {Error|null} error
-       * @param {Value} [result]
-       * @returns {void}
-       */
-      function found(error, result) {
-        /** @type {Array<Callback>} */
-        // @ts-expect-error: always a list if found.
-        const cbs = self.cache[directory]
+      function found(error: Error|null, result?: Value):void {
+        const cbs:unknown | unknown[] = self.cache[directory] ;
+
+        if (!Array.isArray(cbs)) {
+          throw new Error(`Expected cache to contain an array of callback`)
+        }
+        if ( !isCallback<Value>(cbs))  {
+          throw new Error(`Expected cache to contain an array of callback`)
+
+        }
         self.cache[directory] = error || result
         applyAll(cbs, error || result)
       }
     }
 
-    /**
-     * @param {Array<Callback>} cbs
-     * @param {Value|Error|undefined} result
-     */
-    function applyAll(cbs, result) {
+    function applyAll(cbs:Callback<Value>[], result:Value|Error|undefined) {
       let index = cbs.length
 
       while (index--) {
@@ -228,11 +204,7 @@ export class FindUp {
       }
     }
 
-    /**
-     * @param {Callback} cb
-     * @param {Value|Error|Array<Callback>|undefined} result
-     */
-    function apply(cb, result) {
+    function apply(cb:Callback<Value>, result:Value|Error|Array<Callback<Value>>|undefined) {
       if (Array.isArray(result)) {
         result.push(cb)
       } else if (result instanceof Error) {

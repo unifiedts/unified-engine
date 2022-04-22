@@ -1,28 +1,23 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Settings} Settings
- * @typedef {import('./index.js').Configuration} Configuration
- */
-
-/**
- * @typedef Context
- * @property {Array<VFile>} files
- * @property {Configuration} configuration
- * @property {FileSet} fileSet
- */
-
+import type {VFile, VFileReporter} from 'vfile'
+import type {Callback} from 'trough'
+import type {Settings, Configuration} from './index'
 import {FileSet} from '../file-set.js'
 import {filePipeline} from '../file-pipeline/index.js'
 
+export interface Context {
+  files: Array<VFile>
+  configuration: Configuration
+  fileSet: FileSet
+}
+
 /**
  * Transform all files.
- *
- * @param {Context} context
- * @param {Settings} settings
- * @param {Callback} next
  */
-export function transform(context, settings, next) {
+export function transform(
+  context: Context,
+  settings: Settings,
+  next: Callback
+): void {
   const fileSet = new FileSet()
 
   context.fileSet = fileSet
@@ -38,7 +33,7 @@ export function transform(context, settings, next) {
         settings
       },
       file,
-      (/** @type {Error|null} */ error) => {
+      (error: Error | null) => {
         // Does not occur as all failures in `filePipeLine` are failed on each
         // file.
         // Still, just to ensure things work in the future, we add an extra check.

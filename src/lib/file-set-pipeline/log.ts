@@ -1,26 +1,21 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('../index.js').VFileReporter} VFileReporter
- * @typedef {import('./index.js').Settings} Settings
- * @typedef {import('./index.js').Configuration} Configuration
- */
+
+import type {VFile, VFileReporter} from 'vfile'
+import type {Callback} from 'trough'
+import type {Settings, Configuration} from './index'
 
 import {loadPlugin} from 'load-plugin'
 import {reporter} from 'vfile-reporter'
 
-/**
- * @typedef Context
- * @property {Array<VFile>} files
- * @property {Configuration} [configuration]
- */
+export interface Context {
+  files: Array<VFile>
+  configuration?: Configuration
+}
 
-/**
- * @param {Context} context
- * @param {Settings} settings
- */
-export async function log(context, settings) {
-  /** @type {VFileReporter} */
-  let func = reporter
+export async function log(
+  context: Context,
+  settings: Settings
+): Promise<unknown> {
+  let func: VFileReporter = reporter
 
   if (typeof settings.reporter === 'string') {
     try {
@@ -33,7 +28,7 @@ export async function log(context, settings) {
       throw new Error('Could not find reporter `' + settings.reporter + '`')
     }
   } else if (settings.reporter) {
-    func = settings.reporter
+    func = settings.reporter as VFileReporter
   }
 
   let diagnostics = func(

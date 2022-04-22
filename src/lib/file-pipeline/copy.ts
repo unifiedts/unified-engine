@@ -1,9 +1,7 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('trough').Callback} Callback
- * @typedef {import('./index.js').Context} Context
- */
 
+import type {VFile} from 'vfile'
+import type {Callback} from 'trough'
+import type {Context} from './index'
 import fs from 'node:fs'
 import path from 'node:path'
 import createDebug from 'debug'
@@ -12,12 +10,8 @@ const debug = createDebug('unified-engine:file-pipeline:copy')
 
 /**
  * Move a file.
- *
- * @param {Context} context
- * @param {VFile} file
- * @param {Callback} next
  */
-export function copy(context, file, next) {
+export function copy(context: Context, file: VFile, next: Callback): void {
   const output = context.settings.output
   const currentPath = file.path
 
@@ -58,10 +52,7 @@ export function copy(context, file, next) {
     }
   })
 
-  /**
-   * @param {boolean} directory
-   */
-  function done(directory) {
+  function done(directory: boolean): void {
     if (!directory && context.fileSet.expected > 1) {
       return next(
         new Error('Cannot write multiple files to single output: ' + outpath)

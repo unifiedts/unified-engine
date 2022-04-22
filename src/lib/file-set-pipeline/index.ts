@@ -1,8 +1,7 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('../configuration.js').Configuration} Configuration
- * @typedef {import('../index.js').Settings} Settings
- */
+
+export type { VFile } from 'vfile'
+export type { Configuration } from '../configuration.js'
+export type { Settings } from '../index.js'
 
 import {trough} from 'trough'
 import {configure} from './configure.js'

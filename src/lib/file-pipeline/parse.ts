@@ -1,7 +1,5 @@
-/**
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('./index.js').Context} Context
- */
+ import type {VFile} from 'vfile'
+ import type {Context} from './index'
 
 import createDebug from 'debug'
 import {statistics} from 'vfile-statistics'
@@ -15,7 +13,7 @@ const debug = createDebug('unified-engine:file-pipeline:parse')
  * @param {Context} context
  * @param {VFile} file
  */
-export function parse(context, file) {
+export function parse(context: Context, file: VFile): void {
   if (statistics(file).fatal) {
     return
   }
@@ -26,7 +24,7 @@ export function parse(context, file) {
     try {
       context.tree = parseJson(file.toString())
     } catch (error) {
-      const exception = /** @type {Error} */ (error)
+      const exception =  (error)as Error
       const message = file.message(
         new Error('Cannot read file as JSON\n' + exception.message)
       )

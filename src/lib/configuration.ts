@@ -1,37 +1,4 @@
-/**
- * @typedef {import('unified').Plugin<Array<unknown>>} Plugin
- * @typedef {import('unified').PluginTuple<Array<unknown>>} PluginTuple
- * @typedef {import('unified').PluggableList} PluggableList
- *
- * @typedef {Record<string, unknown>} Settings
- *
- * @typedef {Record<string, Settings|null|undefined>} PluginIdObject
- * @typedef {Array<string|[string, ...Array<unknown>]>} PluginIdList
- *
- * @typedef Preset
- * @property {Settings} [settings]
- * @property {PluggableList|PluginIdObject|PluginIdList|undefined} [plugins]
- *
- * @typedef Config
- * @property {Settings} [settings]
- * @property {Array<PluginTuple>} [plugins]
- *
- * @callback ConfigTransform
- * @param {any} config
- * @param {string} filePath
- * @returns {Preset}
- *
- * @callback Loader
- * @param {Buffer} buf
- * @param {string} filePath
- * @returns {Promise<Preset|undefined>}
- *
- * @callback Callback
- * @param {Error|null} error
- * @param {Config} [result]
- * @returns {void}
- */
-
+import type {Plugin, PluginTuple, PluggableList} from 'unified'
 import path from 'node:path'
 import {pathToFileURL} from 'node:url'
 import jsYaml from 'js-yaml'
@@ -42,12 +9,30 @@ import isPlainObj from 'is-plain-obj'
 import {fault} from 'fault'
 import {FindUp} from './find-up.js'
 
+export type Settings = Record<string, unknown>
+export type PluginIdObject = Record<string, Settings | null | undefined>
+export type PluginIdList = Array<string | [string, ...Array<unknown>]>
+
+export interface Config {
+  settings?: Settings
+  plugins?: PluginTuple[]
+}
+export interface Preset {
+  settings?: Settings
+  plugins?: PluggableList | PluginIdObject | PluginIdList | undefined
+}
+export type ConfigTransform = (config: any, filePath: string) => Preset
+export type Loader = (
+  buf: Buffer,
+  filePath: string
+) => Promise<Preset | undefined>
+export type Callback = (error: Error | null, result?: Config) => void
+
 const debug = createDebug('unified-engine:configuration')
 
 const own = {}.hasOwnProperty
 
-/** @type {Record<string, Loader>} */
-const loaders = {
+const loaders: Record<string, Loader> = {
   '.json': loadJson,
   '.cjs': loadScriptOrModule,
   '.mjs': loadScriptOrModule,
@@ -72,23 +57,39 @@ const defaultLoader = loadJson
  * @property {Preset['plugins']} [plugins]
  */
 
-export class Configuration {
-  /**
-   * @param {Options} options
-   */
-  constructor(options) {
-    /** @type {Array<string>} */
-    const names = []
+import {Options as MainOptions} from './index'
 
-    /** @type {string} */
+export interface Options
+  extends Pick<
+    MainOptions,
+    | 'packageField'
+    | 'pluginPrefix'
+    | 'rcName'
+    | 'rcPath'
+    | 'detectConfig'
+    | 'configTransform'
+    | 'defaultConfig'
+    | 'settings'
+    | 'plugins'
+  > {
+  cwd: string
+}
+
+export class Configuration {
+  cwd: string
+  packageField: string | undefined
+  pluginPrefix: string | undefined
+  configTransform: ConfigTransform | undefined
+  defaultConfig: Preset | undefined
+  given: Preset
+  findUp: FindUp<Config>
+
+  constructor(options: Options) {
+    const names: string[] = []
     this.cwd = options.cwd
-    /** @type {string|undefined} */
     this.packageField = options.packageField
-    /** @type {string|undefined} */
     this.pluginPrefix = options.pluginPrefix
-    /** @type {ConfigTransform|undefined} */
     this.configTransform = options.configTransform
-    /** @type {Preset|undefined} */
     this.defaultConfig = options.defaultConfig
 
     if (options.rcName) {
@@ -107,12 +108,9 @@ export class Configuration {
       )
     }
 
-    /** @type {Preset} */
     this.given = {settings: options.settings, plugins: options.plugins}
-    this.create = this.create.bind(this)
 
-    /** @type {FindUp<Config>} */
-    this.findUp = new FindUp({
+    this.findUp = new FindUp<Config>({
       cwd: options.cwd,
       filePath: options.rcPath,
       detect: options.detectConfig,
@@ -121,12 +119,7 @@ export class Configuration {
     })
   }
 
-  /**
-   * @param {string} filePath
-   * @param {Callback} callback
-   * @returns {void}
-   */
-  load(filePath, callback) {
+  load(filePath: string, callback: Callback): void {
     this.findUp.load(
       filePath || path.resolve(this.cwd, 'stdin.js'),
       (error, file) => {
@@ -141,19 +134,16 @@ export class Configuration {
     )
   }
 
-  /**
-   * @param {Buffer|undefined} buf
-   * @param {string|undefined} filePath
-   * @returns {Promise<Config|undefined>}
-   */
-  async create(buf, filePath) {
+  async create(
+    buf?: Buffer | undefined,
+    filePath?: string | undefined
+  ): Promise<Config | undefined> {
     const options = {prefix: this.pluginPrefix, cwd: this.cwd}
-    const result = {settings: {}, plugins: []}
+    const result: Required<Config> = {settings: {}, plugins: []}
     const extname = filePath ? path.extname(filePath) : undefined
     const loader =
       extname && extname in loaders ? loaders[extname] : defaultLoader
-    /** @type {Preset|undefined} */
-    let value
+    let value: Preset | undefined
 
     if (filePath && buf) {
       value = await loader.call(this, buf, filePath)
@@ -184,7 +174,6 @@ export class Configuration {
       await merge(
         result,
         value,
-        // @ts-expect-error: `value` can only exist if w/ `filePath`.
         Object.assign({}, options, {root: path.dirname(filePath)})
       )
     }
@@ -201,8 +190,10 @@ export class Configuration {
   }
 }
 
-/** @type {Loader} */
-async function loadScriptOrModule(_, filePath) {
+async function loadScriptOrModule(
+  _: Buffer,
+  filePath: string
+): Promise<Preset | undefined> {
   // C8 bug on Node@12
   /* c8 ignore next 4 */
   // @ts-expect-error: Assume it matches config.
@@ -210,37 +201,36 @@ async function loadScriptOrModule(_, filePath) {
   return loadFromAbsolutePath(filePath, this.cwd)
 }
 
-/** @type {Loader} */
-async function loadYaml(buf, filePath) {
+async function loadYaml(
+  buf: Buffer,
+  filePath: string
+): Promise<Preset | undefined> {
   // C8 bug on Node@12
   /* c8 ignore next 4 */
-  // @ts-expect-error: Assume it matches config.
   return jsYaml.load(String(buf), {filename: path.basename(filePath)})
 }
 
 /** @type {Loader} */
-async function loadJson(buf, filePath) {
+async function loadJson(
+  buf: Buffer,
+  filePath: string
+): Promise<Preset | undefined> {
   /** @type {Record<string, unknown>} */
   const result = parseJson(String(buf), filePath)
 
   // C8 bug on Node@12
   /* c8 ignore next 8 */
-  // @ts-expect-error: Assume it matches config.
   return path.basename(filePath) === 'package.json'
-    ? // @ts-expect-error: `this` is the configuration context, TS doesn’t like
-      // `this` on callbacks.
-      // type-coverage:ignore-next-line
+    ?
       result[this.packageField]
     : result
 }
 
-/**
- * @param {Required<Config>} target
- * @param {Preset} raw
- * @param {{root: string, prefix: string|undefined}} options
- * @returns {Promise<Config>}
- */
-async function merge(target, raw, options) {
+async function merge(
+  target: Required<Config>,
+  raw: Preset,
+  options: {root: string; prefix: string | undefined}
+): Promise<Config> {
   if (typeof raw === 'object' && raw !== null) {
     await addPreset(raw)
   } else {
@@ -254,7 +244,7 @@ async function merge(target, raw, options) {
   /**
    * @param {Preset} result
    */
-  async function addPreset(result) {
+  async function addPreset(result: Preset): Promise<void> {
     const plugins = result.plugins
 
     if (plugins === null || plugins === undefined) {
@@ -275,7 +265,7 @@ async function merge(target, raw, options) {
   /**
    * @param {PluginIdList|PluggableList} result
    */
-  async function addEach(result) {
+  async function addEach(result: PluginIdList | PluggableList) {
     let index = -1
 
     while (++index < result.length) {
@@ -295,7 +285,7 @@ async function merge(target, raw, options) {
   /**
    * @param {PluginIdObject} result
    */
-  async function addIn(result) {
+  async function addIn(result: PluginIdObject) {
     /** @type {string} */
     let key
 
@@ -314,7 +304,10 @@ async function merge(target, raw, options) {
    * @param {string|Plugin|Preset} usable
    * @param {Settings|null|undefined} value
    */
-  async function use(usable, value) {
+  async function use(
+    usable: string | Plugin | Preset,
+    value: Settings | null | undefined
+  ) {
     if (typeof usable === 'string') {
       await addModule(usable, value)
     } else if (typeof usable === 'function') {
@@ -330,7 +323,7 @@ async function merge(target, raw, options) {
    * @param {string} id
    * @param {Settings|null|undefined} value
    */
-  async function addModule(id, value) {
+  async function addModule(id: string, value: Settings | null | undefined) {
     /** @type {string} */
     let fp
 
@@ -340,7 +333,7 @@ async function merge(target, raw, options) {
         prefix: options.prefix
       })
     } catch (error) {
-      const exception = /** @type {Error} */ (error)
+      const exception: Error = error as Error
       addPlugin(() => {
         throw fault('Could not find module `%s`\n%s', id, exception.stack)
       }, value)
@@ -375,7 +368,7 @@ async function merge(target, raw, options) {
    * @param {Settings|null|undefined} value
    * @returns {void}
    */
-  function addPlugin(plugin, value) {
+  function addPlugin(plugin: Plugin, value: Settings | null | undefined): void {
     const entry = find(target.plugins, plugin)
 
     if (value === null) {
@@ -395,7 +388,7 @@ async function merge(target, raw, options) {
  * @param {Settings|undefined} value
  * @returns {void}
  */
-function reconfigure(entry, value) {
+function reconfigure(entry: PluginTuple, value: Settings | undefined): void {
   if (isPlainObj(entry[1]) && isPlainObj(value)) {
     value = Object.assign({}, entry[1], value)
   }
@@ -408,7 +401,7 @@ function reconfigure(entry, value) {
  * @param {Plugin} plugin
  * @returns {PluginTuple|undefined}
  */
-function find(entries, plugin) {
+function find(entries: PluginTuple[], plugin: Plugin): PluginTuple | undefined {
   let index = -1
 
   while (++index < entries.length) {
@@ -424,7 +417,10 @@ function find(entries, plugin) {
  * @param {string} base
  * @returns {Promise<Plugin|Preset>}
  */
-async function loadFromAbsolutePath(fp, base) {
+async function loadFromAbsolutePath(
+  fp: string,
+  base: string
+): Promise<Plugin | Preset> {
   try {
     /** @type {{default?: unknown}} */
     const result = await import(pathToFileURL(fp).href)
@@ -435,12 +431,11 @@ async function loadFromAbsolutePath(fp, base) {
       )
     }
 
-    // @ts-expect-error: assume plugin/preset.
     return result.default
     // C8 bug on Node@12
     /* c8 ignore next 9 */
   } catch (error) {
-    const exception = /** @type {Error} */ (error)
+    const exception: Error = error as Error
     throw fault(
       'Cannot import `%s`\n%s',
       path.relative(base, fp),

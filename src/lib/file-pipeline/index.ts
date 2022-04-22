@@ -1,24 +1,4 @@
-/**
- * @typedef {import('trough').Pipeline} Pipeline
- * @typedef {import('vfile').VFile} VFile
- * @typedef {import('vfile-message').VFileMessage} VFileMessage
- * @typedef {import('unist').Node} Node
- * @typedef {import('unified').Processor} Processor
- * @typedef {import('../file-set.js').FileSet} FileSet
- * @typedef {import('../configuration.js').Configuration} Configuration
- * @typedef {import('../index.js').Settings} Settings
- */
-
-/**
- * @typedef Context
- * @property {Processor} processor
- * @property {FileSet} fileSet
- * @property {Configuration} configuration
- * @property {Settings} settings
- * @property {Node} [tree]
- */
-
-import {trough} from 'trough'
+import {Pipeline, trough} from 'trough'
 import {read} from './read.js'
 import {configure} from './configure.js'
 import {parse} from './parse.js'
@@ -29,9 +9,25 @@ import {copy} from './copy.js'
 import {stdout} from './stdout.js'
 import {fileSystem} from './file-system.js'
 
+import type {Processor} from 'unified';
+import type { FileSet } from '../file-set.js'
+import type { Configuration } from '../configuration.js'
+import type { Settings } from '../index'
+import type {Node} from 'unist'
+import { VFile } from 'vfile'
+import { VFileMessage } from 'vfile-message'
+
+export interface Context {
+  processor: Processor;
+  fileSet: FileSet;
+  configuration:Configuration;
+  settings: Settings;
+  tree?: Node;
+}
+
 // This pipeline ensures each of the pipes always runs: even if the read pipe
 // fails, queue and write run.
-export const filePipeline = trough()
+export const filePipeline: Pipeline = trough()
   .use(chunk(trough().use(read).use(configure).use(parse).use(transform)))
   .use(chunk(trough().use(queue)))
   .use(chunk(trough().use(stringify).use(copy).use(stdout).use(fileSystem)))
@@ -43,7 +39,7 @@ export const filePipeline = trough()
  *
  * @param {Pipeline} pipe
  */
-function chunk(pipe) {
+function chunk(pipe:Pipeline) {
   return run
 
   /**
@@ -53,8 +49,8 @@ function chunk(pipe) {
    * @param {VFile} file
    * @param {() => void} next
    */
-  function run(context, file, next) {
-    pipe.run(context, file, (/** @type {VFileMessage|null} */ error) => {
+  function run(context: Context, file: VFile, next:() => void ) {
+    pipe.run(context, file, (error:VFileMessage|null) => {
       const messages = file.messages
 
       if (error) {
