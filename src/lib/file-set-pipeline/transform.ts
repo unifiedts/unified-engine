@@ -22,7 +22,7 @@ export function transform(
 
   context.fileSet = fileSet
 
-  fileSet.on('add', (/** @type {VFile} */ file) => {
+  fileSet.on('add', (  file:VFile) => {
     filePipeline.run(
       {
         configuration: context.configuration,

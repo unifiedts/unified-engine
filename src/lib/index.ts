@@ -8,6 +8,9 @@ import {PassThrough} from 'node:stream'
 import {statistics} from 'vfile-statistics'
 import {fileSetPipeline} from './file-set-pipeline/index.js'
 
+export {FileSet,Completer,ResolveFrom,ConfigTransform,Preset};
+
+
 export type VFileReporterOptions = {
   [key: string]: unknown
 } & VFileReporterFields

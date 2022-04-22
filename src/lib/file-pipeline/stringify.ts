@@ -9,12 +9,15 @@ import {inspectColor, inspectNoColor} from 'unist-util-inspect'
 
 const debug = createDebug('unified-engine:file-pipeline:stringify')
 
+
+function isBufferType(value: unknown): value is Buffer {
+  return isBuffer(value);
+}
 /**
  * Stringify a tree.
  */
 export function stringify(context:Context, file: VFile) {
-  /** @type {unknown} */
-  let value
+  let value: unknown;
 
   if (statistics(file).fatal) {
     debug('Not compiling failed document')
@@ -51,12 +54,15 @@ export function stringify(context:Context, file: VFile) {
     // Add the line feed to create a valid UNIX file.
     value = JSON.stringify(context.tree, null, 2) + '\n'
   } else {
+    if (!context.tree) {
+      throw new Error('Stringify expected context.tree to be defined, it was not.')
+    }
     value = context.processor.stringify(context.tree, file)
   }
 
   if (value === undefined || value === null) {
     // Empty.
-  } else if (typeof value === 'string' || isBuffer(value)) {
+  } else if (typeof value === 'string' || isBufferType(value)) {
     file.value = value
   } else {
     file.result = value

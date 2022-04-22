@@ -1,5 +1,5 @@
 {
-  "include": ["lib/**/*.ts", "lib/**/*.json"],
+  "include": ["src/**/*.ts", "src/**/*.json"],
   "compilerOptions": {
     "target": "ES2020",
     "lib": ["ES2020"],
@@ -11,9 +11,9 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "strict": true,
-    "outDir": "lib",
+    "outDir": "dist",
 		"rootDir": "src",
     "inlineSourceMap": true,
-		"declarationDir": "lib/types"
+		"declarationDir": "dist/types"
   }
 }

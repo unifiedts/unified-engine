@@ -16,8 +16,7 @@ export function stdin(context: Context, settings: Settings, next: Callback) {
   if (settings.files && settings.files.length > 0) {
     debug('Ignoring `streamIn`')
 
-    /** @type {Error|undefined} */
-    let error
+    let error: Error|undefined
 
     if (settings.filePath) {
       error = new Error(

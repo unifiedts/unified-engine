@@ -25,7 +25,7 @@ export type Callback<Value>  = (error:Error|null ,result?: Value) => void
 function isCallback<Value>(value:unknown[]): value is Callback<Value>[]
 function isCallback<Value>(value:unknown): value is Callback<Value>
 function isCallback<Value>(value:unknown | unknown[]): value is Callback<Value> |Callback<Value>[] {
-  return (typeof value === 'function' && value.arguments.length === 2)
+  return (typeof value === 'function')
 }
 
 export class FindUp<Value> {
@@ -76,7 +76,7 @@ export class FindUp<Value> {
             result.syscall = error.syscall
             loaded(result)
           } else {
-            wrap(this.create, (error, /** @type {Value} */ result) => {
+            wrap(this.create, (error: Error |null | undefined, result:Value) => {
               if (error) {
                 debug(error.message)
                 loaded(
@@ -163,7 +163,7 @@ export class FindUp<Value> {
           )
         }
 
-        wrap(self.create, (error, /** @type {Value} */ result) => {
+        wrap(self.create, (error,  result: Value) => {
           if (error) {
             found(
               fault(
