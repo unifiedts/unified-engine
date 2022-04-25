@@ -1,10 +1,10 @@
-import fs, {Stats} from 'node:fs';
+import fs, { Stats } from 'node:fs';
 import path from 'node:path';
 import glob from 'glob';
-import ignore, {Ignore as GitIgnore} from 'ignore';
-import {toVFile} from 'to-vfile';
-import {VFile} from 'vfile';
-import {Ignore} from './ignore';
+import ignore, { Ignore as GitIgnore } from 'ignore';
+import { toVFile } from 'to-vfile';
+import { VFile } from 'vfile';
+import { Ignore } from './ignore';
 
 export interface Options {
 	cwd: string;
@@ -66,32 +66,34 @@ function expand(
 	let index = -1;
 	let failed: boolean | undefined;
 
+	const callback = (error: Error | null, files: string[]) => {
+		// Glob errors are unusual.
+		/* c8 ignore next 3 */
+		if (failed) {
+			return;
+		}
+
+		// Glob errors are unusual.
+		/* c8 ignore next 4 */
+		if (error) {
+			failed = true;
+			done1(error);
+		} else {
+			actual++;
+			paths = paths.concat(files);
+
+			if (actual === expected) {
+				search(paths, options, done1);
+			}
+		}
+	};
+
 	while (++index < input.length) {
 		let file = input[index];
 		if (typeof file === 'string') {
 			if (glob.hasMagic(file)) {
 				expected++;
-				glob(file, {cwd: options.cwd}, (error, files) => {
-					// Glob errors are unusual.
-					/* c8 ignore next 3 */
-					if (failed) {
-						return;
-					}
-
-					// Glob errors are unusual.
-					/* c8 ignore next 4 */
-					if (error) {
-						failed = true;
-						done1(error);
-					} else {
-						actual++;
-						paths = paths.concat(files);
-
-						if (actual === expected) {
-							search(paths, options, done1);
-						}
-					}
-				});
+				glob(file, { cwd: options.cwd }, callback);
 			} else {
 				// `relative` to make the paths canonical.
 				file =
@@ -122,7 +124,7 @@ function expand(
 		if (error || !files) {
 			next(error);
 		} else {
-			next(null, {input: paths, output: files});
+			next(null, { input: paths, output: files });
 		}
 	}
 }
@@ -132,7 +134,7 @@ function expand(
  */
 function search(
 	input: Array<string | VFile>,
-	options: Options & {nested?: boolean},
+	options: Options & { nested?: boolean },
 	next: (error: Error | null, files: VFile[]) => void,
 ) {
 	const extraIgnore = ignore().add(options.ignorePatterns);
@@ -172,11 +174,10 @@ function search(
 
 		statAndIgnore(
 			file,
-			Object.assign({}, options, {extraIgnore}),
+			Object.assign({}, options, { extraIgnore }),
 			(error, result) => {
-				const ignored = result && result.ignored;
-				const dir =
-					result && result.stats && result.stats.isDirectory();
+				const ignored = result?.ignored;
+				const dir = result?.stats?.isDirectory();
 
 				if (ignored && (options.nested || options.silentlyIgnore)) {
 					one(null, []);
@@ -275,7 +276,7 @@ function search(
 
 function statAndIgnore(
 	file: VFile | string,
-	options: Options & {extraIgnore: GitIgnore},
+	options: Options & { extraIgnore: GitIgnore },
 	callback: (
 		error: NodeJS.ErrnoException | null,
 		result?: SearchResults,
@@ -313,11 +314,11 @@ function statAndIgnore(
 			callback(null, {
 				stats,
 				ignored:
-					ignored ||
+					ignored ??
 					(normal === '' ||
 					normal === '..' ||
-					normal.charAt(0) === path.sep ||
-					normal.slice(0, 3) === '..' + path.sep
+					normal.startsWith(path.sep) ||
+					normal.startsWith(`..${path.sep}`)
 						? false
 						: options.extraIgnore.ignores(normal)),
 			});

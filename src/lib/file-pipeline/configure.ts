@@ -1,9 +1,9 @@
-import createDebug, {Debugger} from 'debug';
+import createDebug, { Debugger } from 'debug';
 import isEmpty from 'is-empty';
-import {Callback} from 'trough';
-import {VFile} from 'vfile';
-import {statistics} from 'vfile-statistics';
-import type {Context} from './index';
+import { Callback } from 'trough';
+import { VFile } from 'vfile';
+import { statistics } from 'vfile-statistics';
+import type { Context } from './index';
 
 const debug: Debugger = createDebug('unified-engine:file-pipeline:configure');
 
@@ -30,7 +30,7 @@ export function configure(context: Context, file: VFile, next: Callback) {
 
 		// Could be missing if a `configTransform` returns weird things.
 		/* c8 ignore next 1 */
-		const plugins = configuration.plugins || [];
+		const plugins = configuration.plugins ?? [];
 
 		// Store configuration on the context object.
 		debug('Using settings `%j`', configuration.settings);
@@ -66,7 +66,7 @@ export function configure(context: Context, file: VFile, next: Callback) {
 				context.processor.use(plugin, options, context.fileSet);
 				/* Should not happen anymore! */
 				/* c8 ignore next 4 */
-			} catch (error_) {
+			} catch (error_: unknown) {
 				const exception: Error = error_ as Error;
 				next(exception);
 				return;

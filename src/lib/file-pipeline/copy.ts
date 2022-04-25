@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import createDebug from 'debug';
-import type {Callback} from 'trough';
-import type {VFile} from 'vfile';
-import type {Context} from './index';
+import type { Callback } from 'trough';
+import type { VFile } from 'vfile';
+import type { Context } from './index';
 
 const debug = createDebug('unified-engine:file-pipeline:copy');
 
@@ -26,10 +26,7 @@ export function copy(context: Context, file: VFile, next: Callback): void {
 
 	fs.stat(outpath, (error, stats) => {
 		if (error) {
-			if (
-				error.code !== 'ENOENT' ||
-				output.charAt(output.length - 1) === path.sep
-			) {
+			if (error.code !== 'ENOENT' || output.endsWith(path.sep)) {
 				next(
 					new Error(
 						'Cannot read output directory. Error:\n' +

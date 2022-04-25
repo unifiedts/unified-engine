@@ -1,8 +1,8 @@
 import createDebug from 'debug';
-import type {Callback} from 'trough';
-import type {VFile} from 'vfile';
-import {statistics} from 'vfile-statistics';
-import type {Context} from './index';
+import type { Callback } from 'trough';
+import type { VFile } from 'vfile';
+import { statistics } from 'vfile-statistics';
+import type { Context } from './index';
 
 const debug = createDebug('unified-engine:file-pipeline:queue');
 
@@ -15,13 +15,11 @@ const own = {}.hasOwnProperty;
  */
 export function queue(context: Context, file: VFile, next: Callback) {
 	let origin = file.history[0];
-	// @ts-expect-error: store a completion map on the `fileSet`.
 	let map = context.fileSet.complete;
 	let complete = true;
 
 	if (!map) {
 		map = {};
-		// @ts-expect-error: store a completion map on the `fileSet`.
 		context.fileSet.complete = map;
 	}
 
@@ -40,7 +38,6 @@ export function queue(context: Context, file: VFile, next: Callback) {
 		return;
 	}
 
-	// @ts-expect-error: Reset map.
 	context.fileSet.complete = {};
 	context.fileSet.pipeline.run(context.fileSet, done);
 
@@ -63,9 +60,11 @@ export function queue(context: Context, file: VFile, next: Callback) {
 		debug('Flushing: all files can be flushed');
 
 		// Flush.
-		for (origin in map) {
-			if (own.call(map, origin)) {
-				map[origin](error);
+		if (map) {
+			for (origin in map) {
+				if (own.call(map, origin)) {
+					map[origin](error);
+				}
 			}
 		}
 	}

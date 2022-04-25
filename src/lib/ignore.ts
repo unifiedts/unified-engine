@@ -1,8 +1,9 @@
+import { Buffer } from 'node:buffer';
 import path from 'node:path';
-import ignore, {Ignore as GitIgnore} from 'ignore';
-import {FindUp} from './find-up.js';
+import ignore, { Ignore as GitIgnore } from 'ignore';
+import { FindUp } from './find-up.js';
 
-export type IgnoreConfig = GitIgnore & {filePath: string};
+export type IgnoreConfig = GitIgnore & { filePath: string };
 export type ResolveFrom = 'cwd' | 'dir';
 export interface Options {
 	cwd: string;
@@ -51,8 +52,8 @@ export class Ignore {
 				if (
 					normal === '' ||
 					normal === '..' ||
-					normal.charAt(0) === path.sep ||
-					normal.slice(0, 3) === '..' + path.sep
+					normal.startsWith(path.sep) ||
+					normal.startsWith(`..${path.sep}`)
 				) {
 					callback(null, false);
 				} else {

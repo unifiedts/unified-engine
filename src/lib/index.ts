@@ -1,20 +1,25 @@
 import process from 'node:process';
-import {PassThrough} from 'node:stream';
-import {Processor} from 'unified';
-import {VFile} from 'vfile';
-import {statistics} from 'vfile-statistics';
-import {ConfigTransform, Preset} from './configuration';
-import {fileSetPipeline} from './file-set-pipeline/index.js';
-import {FileSet} from './file-set.js';
-import {ResolveFrom} from './ignore.js';
+import { PassThrough } from 'node:stream';
+import { Processor } from 'unified';
+import { VFile } from 'vfile';
+import { statistics } from 'vfile-statistics';
+import type { ConfigTransform, Preset } from './configuration';
+import { fileSetPipeline } from './file-set-pipeline/index.js';
+import { FileSet } from './file-set.js';
+import { ResolveFrom } from './ignore.js';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type VFileReporterOptions = Record<string, unknown> &
 	VFileReporterFields;
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface VFileReporterFields {
 	color?: boolean;
 	quiet?: boolean;
 	silent?: boolean;
 }
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type VFileReporter = (
 	files: VFile[],
 	options: VFileReporterOptions,
@@ -211,20 +216,20 @@ export function engine(options: Options, callback: Callback) {
 	settings.processor = options.processor;
 
 	// Path to run as.
-	settings.cwd = options.cwd || process.cwd();
+	settings.cwd = options.cwd ?? process.cwd();
 
 	// Input.
-	settings.files = options.files || [];
-	settings.extensions = (options.extensions || []).map((ext) =>
+	settings.files = options.files ?? [];
+	settings.extensions = (options.extensions ?? []).map((ext) =>
 		ext.startsWith('.') ? ext : '.' + ext,
 	);
 
 	settings.filePath = options.filePath;
-	settings.streamIn = options.streamIn || stdin;
+	settings.streamIn = options.streamIn ?? stdin;
 
 	// Output.
-	settings.streamOut = options.streamOut || process.stdout;
-	settings.streamError = options.streamError || process.stderr;
+	settings.streamOut = options.streamOut ?? process.stdout;
+	settings.streamError = options.streamError ?? process.stderr;
 	settings.alwaysStringify = options.alwaysStringify;
 	settings.output = options.output;
 	settings.out = options.out;
@@ -240,13 +245,13 @@ export function engine(options: Options, callback: Callback) {
 	}
 
 	// Process phase management.
-	const tree = options.tree || false;
+	const tree = options.tree ?? false;
 
 	settings.treeIn = options.treeIn;
 	settings.treeOut = options.treeOut;
 	settings.inspect = options.inspect;
 
-	if (settings.treeIn === null || settings.treeIn === undefined) {
+	if (settings.treeIn === null ?? settings.treeIn === undefined) {
 		settings.treeIn = tree;
 	}
 
@@ -256,7 +261,7 @@ export function engine(options: Options, callback: Callback) {
 
 	// Configuration.
 	const detectConfig = options.detectConfig;
-	const hasConfig = Boolean(options.rcName || options.packageField);
+	const hasConfig = Boolean(options.rcName ?? options.packageField);
 
 	if (detectConfig && !hasConfig) {
 		next(
@@ -272,7 +277,7 @@ export function engine(options: Options, callback: Callback) {
 	settings.rcName = options.rcName;
 	settings.rcPath = options.rcPath;
 	settings.packageField = options.packageField;
-	settings.settings = options.settings || {};
+	settings.settings = options.settings ?? {};
 	settings.configTransform = options.configTransform;
 	settings.defaultConfig = options.defaultConfig;
 
@@ -286,8 +291,8 @@ export function engine(options: Options, callback: Callback) {
 			: detectIgnore;
 	settings.ignoreName = options.ignoreName;
 	settings.ignorePath = options.ignorePath;
-	settings.ignorePathResolveFrom = options.ignorePathResolveFrom || 'dir';
-	settings.ignorePatterns = options.ignorePatterns || [];
+	settings.ignorePathResolveFrom = options.ignorePathResolveFrom ?? 'dir';
+	settings.ignorePatterns = options.ignorePatterns ?? [];
 	settings.silentlyIgnore = Boolean(options.silentlyIgnore);
 
 	if (detectIgnore && !hasIgnore) {
@@ -297,25 +302,25 @@ export function engine(options: Options, callback: Callback) {
 
 	// Plugins.
 	settings.pluginPrefix = options.pluginPrefix;
-	settings.plugins = options.plugins || [];
+	settings.plugins = options.plugins ?? [];
 
 	// Reporting.
 	settings.reporter = options.reporter;
 	settings.reporterOptions = options.reporterOptions;
-	settings.color = options.color || false;
+	settings.color = options.color ?? false;
 	settings.silent = options.silent;
 	settings.quiet = options.quiet;
 	settings.frail = options.frail;
 
 	// Process.
-	fileSetPipeline.run({files: options.files || []}, settings, next);
+	fileSetPipeline.run({ files: options.files ?? [] }, settings, next);
 
 	/**
 	 * @param {Error|null} error
 	 * @param {Context} [context]
 	 */
 	function next(error: Error | null, context?: Context) {
-		const stats = statistics((context || {}).files);
+		const stats = statistics((context ?? {}).files);
 		const failed = Boolean(
 			settings.frail ? stats.fatal || stats.warn : stats.fatal,
 		);
@@ -328,6 +333,6 @@ export function engine(options: Options, callback: Callback) {
 	}
 }
 
-export {ConfigTransform, Preset} from './configuration';
-export {Completer, FileSet} from './file-set.js';
-export {ResolveFrom} from './ignore.js';
+export { ConfigTransform, Preset } from './configuration';
+export { Completer, FileSet } from './file-set.js';
+export { ResolveFrom } from './ignore.js';

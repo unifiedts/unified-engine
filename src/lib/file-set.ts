@@ -3,10 +3,11 @@
  * @typedef {import('trough').Pipeline} Pipeline
  */
 
-import {EventEmitter} from 'node:events';
-import {toVFile} from 'to-vfile';
-import {Pipeline, trough} from 'trough';
-import {VFile} from 'vfile';
+import { EventEmitter } from 'node:events';
+import { toVFile } from 'to-vfile';
+import type { Callback } from 'trough';
+import { Pipeline, trough } from 'trough';
+import { VFile } from 'vfile';
 
 export type CompleterCallback = (
 	set: FileSet,
@@ -25,6 +26,7 @@ export class FileSet extends EventEmitter {
 	expected: number;
 	actual: number;
 	pipeline: Pipeline;
+	complete?: Record<string, Callback> | undefined;
 	/**
 	 * FileSet constructor.
 	 * A FileSet is created to process multiple files through unified processors.
@@ -66,7 +68,7 @@ export class FileSet extends EventEmitter {
 		const pipeline = this.pipeline;
 		let duplicate = false;
 
-		if (plugin && plugin.pluginId) {
+		if (plugin?.pluginId) {
 			duplicate = this.plugins.some(
 				(fn) => fn.pluginId === plugin.pluginId,
 			);

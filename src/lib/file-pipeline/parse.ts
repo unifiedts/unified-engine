@@ -1,10 +1,16 @@
 import createDebug from 'debug';
+import isPlainObject from 'is-plain-obj';
 import parseJson from 'parse-json';
-import type {VFile} from 'vfile';
-import {statistics} from 'vfile-statistics';
-import type {Context} from './index';
+import type { Node } from 'unist';
+import type { VFile } from 'vfile';
+import { statistics } from 'vfile-statistics';
+import type { Context } from './index';
 
 const debug = createDebug('unified-engine:file-pipeline:parse');
+
+function isNode(value: unknown): value is Node {
+	return isPlainObject(value) && value.type;
+}
 
 /**
  * Fill a file with a tree.
@@ -21,8 +27,15 @@ export function parse(context: Context, file: VFile): void {
 		debug('Not parsing already parsed document');
 
 		try {
-			context.tree = parseJson(file.toString());
-		} catch (error) {
+			const data: unknown = parseJson(file.toString()) as unknown;
+			if (!isNode(data)) {
+				throw new Error(
+					`Parse expected input file to be a tree, it was not.`,
+				);
+			}
+
+			context.tree = data;
+		} catch (error: unknown) {
 			const exception = error as Error;
 			const message = file.message(
 				new Error('Cannot read file as JSON\n' + exception.message),

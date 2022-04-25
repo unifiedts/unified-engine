@@ -1,13 +1,14 @@
+import { Buffer } from 'node:buffer';
 import path from 'node:path';
-import {pathToFileURL} from 'node:url';
+import { pathToFileURL } from 'node:url';
 import createDebug from 'debug';
-import {fault} from 'fault';
-import isPlainObj from 'is-plain-obj';
+import { fault } from 'fault';
+import isPlainObject from 'is-plain-obj';
 import jsYaml from 'js-yaml';
-import {resolvePlugin} from 'load-plugin';
+import { resolvePlugin } from 'load-plugin';
 import parseJson from 'parse-json';
-import type {PluggableList, Plugin, PluginTuple} from 'unified';
-import {FindUp} from './find-up.js';
+import type { PluggableList, Plugin, PluginTuple } from 'unified';
+import { FindUp } from './find-up.js';
 /**
  * @typedef Options
  * @property {string} cwd
@@ -21,7 +22,7 @@ import {FindUp} from './find-up.js';
  * @property {Preset['settings']} [settings]
  * @property {Preset['plugins']} [plugins]
  */
-import {Options as MainOptions} from './index';
+import type { Options as MainOptions } from './index';
 
 export type Settings = Record<string, unknown>;
 export type PluginIdObject = Record<string, Settings | null | undefined>;
@@ -37,8 +38,8 @@ export interface Preset {
 }
 
 export function isPreset(value: unknown): value is Preset {
-	if (isPlainObj(value)) {
-		if (!(value.settings && isPlainObj(value.settings))) {
+	if (isPlainObject(value)) {
+		if (!(value.settings && isPlainObject(value.settings))) {
 			return false;
 		}
 
@@ -110,7 +111,9 @@ export class Configuration {
 		if (options.rcName) {
 			names.push(
 				options.rcName,
-				...Object.keys(loaders).map((d) => options.rcName + d),
+				...Object.keys(loaders).map((d) =>
+					options.rcName ? options.rcName + d : d,
+				),
 			);
 			debug('Looking for `%s` configuration files', names);
 		}
@@ -123,7 +126,7 @@ export class Configuration {
 			);
 		}
 
-		this.given = {settings: options.settings, plugins: options.plugins};
+		this.given = { settings: options.settings, plugins: options.plugins };
 
 		this.findUp = new FindUp<Config>({
 			cwd: options.cwd,
@@ -154,8 +157,8 @@ export class Configuration {
 		buf?: Buffer | undefined,
 		filePath?: string | undefined,
 	): Promise<Config | undefined> {
-		const options = {prefix: this.pluginPrefix, cwd: this.cwd};
-		const result: Required<Config> = {settings: {}, plugins: []};
+		const options = { prefix: this.pluginPrefix, cwd: this.cwd };
+		const result: Required<Config> = { settings: {}, plugins: [] };
 		const extname = filePath ? path.extname(filePath) : undefined;
 		const loader =
 			extname && extname in loaders ? loaders[extname] : defaultLoader;
@@ -187,21 +190,21 @@ export class Configuration {
 				await merge(
 					result,
 					this.defaultConfig,
-					Object.assign({}, options, {root: this.cwd}),
+					Object.assign({}, options, { root: this.cwd }),
 				);
 			}
 		} else {
 			await merge(
 				result,
 				value,
-				Object.assign({}, options, {root: path.dirname(filePath)}),
+				Object.assign({}, options, { root: path.dirname(filePath) }),
 			);
 		}
 
 		await merge(
 			result,
 			this.given,
-			Object.assign({}, options, {root: this.cwd}),
+			Object.assign({}, options, { root: this.cwd }),
 		);
 
 		// C8 bug on Node@12
@@ -237,11 +240,17 @@ async function loadYaml(
 
 /** @type {Loader} */
 async function loadJson(
-	this: {packageField: string},
+	this: { packageField: string },
 	buf: Buffer,
 	filePath: string,
 ): Promise<Preset | undefined> {
-	const result: Record<string, unknown> = parseJson(String(buf), filePath);
+	const data = parseJson(String(buf), filePath) as unknown;
+
+	if (!isPlainObject(data)) {
+		throw new Error('loadJson expected to load a plain object.');
+	}
+
+	const result: Record<string, unknown> = data;
 
 	// C8 bug on Node@12
 	/* c8 ignore next 8 */
@@ -258,12 +267,12 @@ async function loadJson(
 async function merge(
 	target: Required<Config>,
 	raw: Preset,
-	options: {root: string; prefix: string | undefined},
+	options: { root: string; prefix: string | undefined },
 ): Promise<Config> {
 	if (typeof raw === 'object' && raw !== null) {
 		await addPreset(raw);
 	} else {
-		throw new Error('Expected preset, not `' + raw + '`');
+		throw new Error(`Expected preset,got something else (unexpected)`);
 	}
 
 	// C8 bug on Node@12
@@ -286,7 +295,7 @@ async function merge(
 			await (Array.isArray(plugins) ? addEach(plugins) : addIn(plugins));
 		} else {
 			throw new Error(
-				'Expected a list or object of plugins, not `' + plugins + '`',
+				`Expected a list or object of plugins, got something else (unexpected)`,
 			);
 		}
 
@@ -365,7 +374,7 @@ async function merge(
 				cwd: options.root,
 				prefix: options.prefix,
 			});
-		} catch (error) {
+		} catch (error: unknown) {
 			const exception: Error = error as Error;
 			addPlugin(() => {
 				throw fault(
@@ -386,7 +395,7 @@ async function merge(
 				await merge(
 					target,
 					result,
-					Object.assign({}, options, {root: path.dirname(fp)}),
+					Object.assign({}, options, { root: path.dirname(fp) }),
 				);
 			}
 		} catch {
@@ -432,7 +441,7 @@ function reconfigure(
 	entry: PluginTuple<unknown[]>,
 	value: Settings | undefined,
 ): void {
-	if (isPlainObj(entry[1]) && isPlainObj(value)) {
+	if (isPlainObject(entry[1]) && isPlainObject(value)) {
 		value = Object.assign({}, entry[1], value);
 	}
 
@@ -458,7 +467,8 @@ async function loadFromAbsolutePath(
 	base: string,
 ): Promise<Plugin | Preset> {
 	try {
-		const result: {default?: Plugin | Preset} = await import(
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		const result: { default?: Plugin | Preset } = await import(
 			pathToFileURL(fp).href
 		);
 
@@ -471,7 +481,7 @@ async function loadFromAbsolutePath(
 		return result.default;
 		// C8 bug on Node@12
 		/* c8 ignore next 9 */
-	} catch (error) {
+	} catch (error: unknown) {
 		const exception: Error = error as Error;
 		throw fault(
 			'Cannot import `%s`\n%s',
