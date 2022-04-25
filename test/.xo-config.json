@@ -1,0 +1,6 @@
+{
+	"env": ["jest", "node"],
+	"rules": {
+		"arrow-parens": ["error","always"]
+	}
+}

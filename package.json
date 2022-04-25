@@ -11,18 +11,10 @@
 	"repository": "unifiedts/unified-engine",
 	"bugs": "https://github.com/unifiedts/unified-engine/issues",
 	"sideEffects": false,
-	"main": "dist/index.js",
-	"types": "dist/typesindex.d.ts",
 	"files": [
 		"dist/"
 	],
 	"dependencies": {
-		"@types/concat-stream": "^1.0.0",
-		"@types/debug": "^4.0.0",
-		"@types/is-empty": "^1.0.0",
-		"@types/js-yaml": "^4.0.0",
-		"@types/node": "^17.0.0",
-		"@types/unist": "^2.0.0",
 		"concat-stream": "^2.0.0",
 		"debug": "^4.0.0",
 		"fault": "^2.0.0",
@@ -33,6 +25,7 @@
 		"is-plain-obj": "^4.0.0",
 		"js-yaml": "^4.0.0",
 		"load-plugin": "^4.0.0",
+		"lodash": "^4.17.21",
 		"parse-json": "^6.0.0",
 		"to-vfile": "^7.0.0",
 		"trough": "^2.0.0",
@@ -42,10 +35,19 @@
 		"vfile-statistics": "^2.0.0"
 	},
 	"devDependencies": {
+		"@types/concat-stream": "^1.0.0",
+		"@types/debug": "^4.0.0",
 		"@types/glob": "^7.0.0",
+		"@types/is-empty": "^1.0.0",
+		"@types/jest": "^27.4.1",
+		"@types/js-yaml": "^4.0.0",
+		"@types/lodash": "^4.14.182",
+		"@types/node": "^17.0.0",
 		"@types/tape": "^4.0.0",
+		"@types/unist": "^2.0.0",
 		"c8": "^7.0.0",
 		"husky": "^7.0.4",
+		"jest": "^27.5.1",
 		"lint-staged": "^11.1.2",
 		"organize-imports-cli": "^0.9.0",
 		"prettier": "^2.0.0",
@@ -56,6 +58,8 @@
 		"rimraf": "^3.0.0",
 		"strip-ansi": "^7.0.0",
 		"tape": "^5.0.0",
+		"ts-jest": "^27.1.4",
+		"ts-node": "^10.7.0",
 		"type-coverage": "^2.0.0",
 		"typescript": "^4.0.0",
 		"unified": "^10.0.0",
@@ -117,7 +121,10 @@
 			"capitalized-comments": "off",
 			"complexity": "off",
 			"unicorn/no-this-assignment": "off",
-			"import/extensions": "off"
+			"import/extensions": "off",
+			"@typescript-eslint/no-unsafe-call": "warn",
+			"@typescript-eslint/no-unsafe-assignment": "warn",
+			"@typescript-eslint/no-unsafe-return": "warn"
 		},
 		"overrides": [
 			{

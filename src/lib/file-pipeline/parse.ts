@@ -1,15 +1,22 @@
 import createDebug from 'debug';
-import isPlainObject from 'is-plain-obj';
 import parseJson from 'parse-json';
 import type {Node} from 'unist';
 import type {VFile} from 'vfile';
 import {statistics} from 'vfile-statistics';
+import {has, isPlainObject as isPojo} from 'lodash';
 import type {Context} from './index';
 
 const debug = createDebug('unified-engine:file-pipeline:parse');
 
+function isPlainObject<
+	K extends string | number | symbol = string,
+	U = unknown,
+>(value: unknown): value is Record<K, U> {
+	return isPojo(value) && has(value, 'type');
+}
+
 function isNode(value: unknown): value is Node {
-	return isPlainObject(value) && value.type;
+	return isPlainObject(value) && has(value, 'type');
 }
 
 /**

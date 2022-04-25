@@ -48,7 +48,7 @@ export function queue(context: Context, file: VFile, next: Callback) {
 			return;
 		}
 
-		if (typeof map[key] === 'function') {
+		if (typeof map?.[key] === 'function') {
 			debug('`%s` can be flushed', key);
 		} else {
 			debug('Interupting flush: `%s` is not finished', key);
