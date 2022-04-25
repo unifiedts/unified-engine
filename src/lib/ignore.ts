@@ -1,9 +1,9 @@
-import { Buffer } from 'node:buffer';
+import {Buffer} from 'node:buffer';
 import path from 'node:path';
-import ignore, { Ignore as GitIgnore } from 'ignore';
-import { FindUp } from './find-up.js';
+import ignore, {Ignore as GitIgnore} from 'ignore';
+import {FindUp} from './find-up.js';
 
-export type IgnoreConfig = GitIgnore & { filePath: string };
+export type IgnoreConfig = GitIgnore & {filePath: string};
 export type ResolveFrom = 'cwd' | 'dir';
 export interface Options {
 	cwd: string;

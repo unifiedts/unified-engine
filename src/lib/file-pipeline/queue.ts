@@ -1,8 +1,8 @@
 import createDebug from 'debug';
-import type { Callback } from 'trough';
-import type { VFile } from 'vfile';
-import { statistics } from 'vfile-statistics';
-import type { Context } from './index';
+import type {Callback} from 'trough';
+import type {VFile} from 'vfile';
+import {statistics} from 'vfile-statistics';
+import type {Context} from './index';
 
 const debug = createDebug('unified-engine:file-pipeline:queue');
 

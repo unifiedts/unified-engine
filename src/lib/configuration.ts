@@ -1,14 +1,14 @@
-import { Buffer } from 'node:buffer';
+import {Buffer} from 'node:buffer';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import {pathToFileURL} from 'node:url';
 import createDebug from 'debug';
-import { fault } from 'fault';
+import {fault} from 'fault';
 import isPlainObject from 'is-plain-obj';
 import jsYaml from 'js-yaml';
-import { resolvePlugin } from 'load-plugin';
+import {resolvePlugin} from 'load-plugin';
 import parseJson from 'parse-json';
-import type { PluggableList, Plugin, PluginTuple } from 'unified';
-import { FindUp } from './find-up.js';
+import type {PluggableList, Plugin, PluginTuple} from 'unified';
+import {FindUp} from './find-up.js';
 /**
  * @typedef Options
  * @property {string} cwd
@@ -22,7 +22,7 @@ import { FindUp } from './find-up.js';
  * @property {Preset['settings']} [settings]
  * @property {Preset['plugins']} [plugins]
  */
-import type { Options as MainOptions } from './index';
+import type {Options as MainOptions} from './index';
 
 export type Settings = Record<string, unknown>;
 export type PluginIdObject = Record<string, Settings | null | undefined>;
@@ -126,7 +126,7 @@ export class Configuration {
 			);
 		}
 
-		this.given = { settings: options.settings, plugins: options.plugins };
+		this.given = {settings: options.settings, plugins: options.plugins};
 
 		this.findUp = new FindUp<Config>({
 			cwd: options.cwd,
@@ -157,8 +157,8 @@ export class Configuration {
 		buf?: Buffer | undefined,
 		filePath?: string | undefined,
 	): Promise<Config | undefined> {
-		const options = { prefix: this.pluginPrefix, cwd: this.cwd };
-		const result: Required<Config> = { settings: {}, plugins: [] };
+		const options = {prefix: this.pluginPrefix, cwd: this.cwd};
+		const result: Required<Config> = {settings: {}, plugins: []};
 		const extname = filePath ? path.extname(filePath) : undefined;
 		const loader =
 			extname && extname in loaders ? loaders[extname] : defaultLoader;
@@ -190,21 +190,21 @@ export class Configuration {
 				await merge(
 					result,
 					this.defaultConfig,
-					Object.assign({}, options, { root: this.cwd }),
+					Object.assign({}, options, {root: this.cwd}),
 				);
 			}
 		} else {
 			await merge(
 				result,
 				value,
-				Object.assign({}, options, { root: path.dirname(filePath) }),
+				Object.assign({}, options, {root: path.dirname(filePath)}),
 			);
 		}
 
 		await merge(
 			result,
 			this.given,
-			Object.assign({}, options, { root: this.cwd }),
+			Object.assign({}, options, {root: this.cwd}),
 		);
 
 		// C8 bug on Node@12
@@ -240,7 +240,7 @@ async function loadYaml(
 
 /** @type {Loader} */
 async function loadJson(
-	this: { packageField: string },
+	this: {packageField: string},
 	buf: Buffer,
 	filePath: string,
 ): Promise<Preset | undefined> {
@@ -267,7 +267,7 @@ async function loadJson(
 async function merge(
 	target: Required<Config>,
 	raw: Preset,
-	options: { root: string; prefix: string | undefined },
+	options: {root: string; prefix: string | undefined},
 ): Promise<Config> {
 	if (typeof raw === 'object' && raw !== null) {
 		await addPreset(raw);
@@ -395,7 +395,7 @@ async function merge(
 				await merge(
 					target,
 					result,
-					Object.assign({}, options, { root: path.dirname(fp) }),
+					Object.assign({}, options, {root: path.dirname(fp)}),
 				);
 			}
 		} catch {
@@ -468,7 +468,7 @@ async function loadFromAbsolutePath(
 ): Promise<Plugin | Preset> {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		const result: { default?: Plugin | Preset } = await import(
+		const result: {default?: Plugin | Preset} = await import(
 			pathToFileURL(fp).href
 		);
 

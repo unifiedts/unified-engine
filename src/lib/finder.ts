@@ -1,10 +1,10 @@
-import fs, { Stats } from 'node:fs';
+import fs, {Stats} from 'node:fs';
 import path from 'node:path';
 import glob from 'glob';
-import ignore, { Ignore as GitIgnore } from 'ignore';
-import { toVFile } from 'to-vfile';
-import { VFile } from 'vfile';
-import { Ignore } from './ignore';
+import ignore, {Ignore as GitIgnore} from 'ignore';
+import {toVFile} from 'to-vfile';
+import {VFile} from 'vfile';
+import {Ignore} from './ignore';
 
 export interface Options {
 	cwd: string;
@@ -93,7 +93,7 @@ function expand(
 		if (typeof file === 'string') {
 			if (glob.hasMagic(file)) {
 				expected++;
-				glob(file, { cwd: options.cwd }, callback);
+				glob(file, {cwd: options.cwd}, callback);
 			} else {
 				// `relative` to make the paths canonical.
 				file =
@@ -124,7 +124,7 @@ function expand(
 		if (error || !files) {
 			next(error);
 		} else {
-			next(null, { input: paths, output: files });
+			next(null, {input: paths, output: files});
 		}
 	}
 }
@@ -134,7 +134,7 @@ function expand(
  */
 function search(
 	input: Array<string | VFile>,
-	options: Options & { nested?: boolean },
+	options: Options & {nested?: boolean},
 	next: (error: Error | null, files: VFile[]) => void,
 ) {
 	const extraIgnore = ignore().add(options.ignorePatterns);
@@ -174,7 +174,7 @@ function search(
 
 		statAndIgnore(
 			file,
-			Object.assign({}, options, { extraIgnore }),
+			Object.assign({}, options, {extraIgnore}),
 			(error, result) => {
 				const ignored = result?.ignored;
 				const dir = result?.stats?.isDirectory();
@@ -276,7 +276,7 @@ function search(
 
 function statAndIgnore(
 	file: VFile | string,
-	options: Options & { extraIgnore: GitIgnore },
+	options: Options & {extraIgnore: GitIgnore},
 	callback: (
 		error: NodeJS.ErrnoException | null,
 		result?: SearchResults,

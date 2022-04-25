@@ -1,9 +1,9 @@
-import { Buffer } from 'node:buffer';
-import fs, { PathLike } from 'node:fs';
+import {Buffer} from 'node:buffer';
+import fs, {PathLike} from 'node:fs';
 import path from 'node:path';
-import { fault } from 'fault';
+import {fault} from 'fault';
 import createDebug from 'debug';
-import { wrap } from 'trough';
+import {wrap} from 'trough';
 
 const debug = createDebug('unified-engine:find-up');
 export interface BaseValue {
@@ -58,7 +58,7 @@ export class FindUp<Value> {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this;
 		const givenFile = this.givenFile;
-		const { givenFilePath } = this;
+		const {givenFilePath} = this;
 
 		if (givenFilePath) {
 			if (givenFile) {

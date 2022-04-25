@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import createDebug from 'debug';
-import type { Callback } from 'trough';
-import type { VFile } from 'vfile';
-import type { Context } from './index';
+import type {Callback} from 'trough';
+import type {VFile} from 'vfile';
+import type {Context} from './index';
 
 const debug = createDebug('unified-engine:file-pipeline:copy');
 

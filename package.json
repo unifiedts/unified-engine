@@ -76,8 +76,7 @@
 		"*.{ts,tsx}": [
 			"organize-imports-cli",
 			"npx prettier --write --no-editorconfig",
-			"npx xo --fix",
-			"npx prettier --write --no-editorconfig"
+			"npx xo --fix"
 		],
 		"*.d.ts": [
 			"npx xo --fix"

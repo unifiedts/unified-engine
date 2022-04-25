@@ -1,9 +1,9 @@
-import createDebug, { Debugger } from 'debug';
+import createDebug, {Debugger} from 'debug';
 import isEmpty from 'is-empty';
-import { Callback } from 'trough';
-import { VFile } from 'vfile';
-import { statistics } from 'vfile-statistics';
-import type { Context } from './index';
+import {Callback} from 'trough';
+import {VFile} from 'vfile';
+import {statistics} from 'vfile-statistics';
+import type {Context} from './index';
 
 const debug: Debugger = createDebug('unified-engine:file-pipeline:configure');
 

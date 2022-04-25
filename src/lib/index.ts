@@ -1,12 +1,12 @@
 import process from 'node:process';
-import { PassThrough } from 'node:stream';
-import { Processor } from 'unified';
-import { VFile } from 'vfile';
-import { statistics } from 'vfile-statistics';
-import type { ConfigTransform, Preset } from './configuration';
-import { fileSetPipeline } from './file-set-pipeline/index.js';
-import { FileSet } from './file-set.js';
-import { ResolveFrom } from './ignore.js';
+import {PassThrough} from 'node:stream';
+import {Processor} from 'unified';
+import {VFile} from 'vfile';
+import {statistics} from 'vfile-statistics';
+import type {ConfigTransform, Preset} from './configuration';
+import {fileSetPipeline} from './file-set-pipeline/index.js';
+import {FileSet} from './file-set.js';
+import {ResolveFrom} from './ignore.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type VFileReporterOptions = Record<string, unknown> &
@@ -313,7 +313,7 @@ export function engine(options: Options, callback: Callback) {
 	settings.frail = options.frail;
 
 	// Process.
-	fileSetPipeline.run({ files: options.files ?? [] }, settings, next);
+	fileSetPipeline.run({files: options.files ?? []}, settings, next);
 
 	/**
 	 * @param {Error|null} error
@@ -333,6 +333,6 @@ export function engine(options: Options, callback: Callback) {
 	}
 }
 
-export { ConfigTransform, Preset } from './configuration';
-export { Completer, FileSet } from './file-set.js';
-export { ResolveFrom } from './ignore.js';
+export {ConfigTransform, Preset} from './configuration';
+export {Completer, FileSet} from './file-set.js';
+export {ResolveFrom} from './ignore.js';

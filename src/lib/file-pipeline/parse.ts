@@ -1,10 +1,10 @@
 import createDebug from 'debug';
 import isPlainObject from 'is-plain-obj';
 import parseJson from 'parse-json';
-import type { Node } from 'unist';
-import type { VFile } from 'vfile';
-import { statistics } from 'vfile-statistics';
-import type { Context } from './index';
+import type {Node} from 'unist';
+import type {VFile} from 'vfile';
+import {statistics} from 'vfile-statistics';
+import type {Context} from './index';
 
 const debug = createDebug('unified-engine:file-pipeline:parse');
 

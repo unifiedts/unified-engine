@@ -3,11 +3,11 @@
  * @typedef {import('trough').Pipeline} Pipeline
  */
 
-import { EventEmitter } from 'node:events';
-import { toVFile } from 'to-vfile';
-import type { Callback } from 'trough';
-import { Pipeline, trough } from 'trough';
-import { VFile } from 'vfile';
+import {EventEmitter} from 'node:events';
+import {toVFile} from 'to-vfile';
+import type {Callback} from 'trough';
+import {Pipeline, trough} from 'trough';
+import {VFile} from 'vfile';
 
 export type CompleterCallback = (
 	set: FileSet,
